@@ -6,8 +6,9 @@ SuperMario clone written in C++ using OpenGL 4.6 targetting mainly Linux-based o
 
 ### Requisites
 
-- premake5 `alpha16+`
-- glfw `3+`
+- premake5 v`^alpha16`
+- opengl v`4.6`
+- glfw v`^3.3.4`
 - gmake
 
 #### Linux
