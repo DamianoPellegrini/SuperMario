@@ -11,30 +11,12 @@ workspace "SuperMario"
         defines { "NDEBUG" }
         optimize "On"
     
+    -- Deactivate filtering
     filter {}
 
-project "SuperMario"
-    location "SuperMario"
-    kind "ConsoleApp"
-    language "C++"
-    cppdialect "C++20"
-    
-    pchheader "pch.hpp"
-    pchsource "SuperMario/src/pch.cpp"
+    -- Adding every dependency that need to be compiled
+    group "Dependencies"
+        include "dependencies/glad"
 
-    targetdir "bin/%{cfg.buildcfg}"
-    objdir "obj/%{cfg.buildcfg}"
-
-    files {
-        "SuperMario/src/**.cpp",
-        "SuperMario/src/**.hpp"
-    }
-
-    includedirs {
-        "SuperMario/src"
-    }
-
-    links {
-        "GL",
-        "glfw"
-    }
+    group ""
+        include "SuperMario"
