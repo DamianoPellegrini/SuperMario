@@ -1,2 +1,2 @@
-**/premake5.lua linguist-vendored
+premake5.lua linguist-vendored
 dependencies/ linguist-vendored
