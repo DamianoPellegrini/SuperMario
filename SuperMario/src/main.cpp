@@ -126,10 +126,12 @@ int main(int argc, char **argv, char **envp)
     };
 
     unsigned int indices[6] = {
+        // First triangle
         0,
         1,
         3,
 
+        // Second triangle
         1,
         2,
         3,
@@ -160,7 +162,7 @@ int main(int argc, char **argv, char **envp)
 
         glClearColor(0.2f, 0.2f, 0.25f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        
+
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         glfwSwapBuffers(window);
