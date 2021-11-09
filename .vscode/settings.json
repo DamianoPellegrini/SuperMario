@@ -17,13 +17,13 @@
     "makefile.buildBeforeLaunch": true,
     "makefile.launchConfigurations": [
         {
-            "cwd": "/home/damiano/Development/C++/SuperMario/bin/Debug",
-            "binaryPath": "/home/damiano/Development/C++/SuperMario/bin/Debug/SuperMario",
+            "cwd": "/home/damiano/Development/CPlusPlus/SuperMario/bin/Debug",
+            "binaryPath": "/home/damiano/Development/CPlusPlus/SuperMario/bin/Debug/SuperMario",
             "binaryArgs": []
         },
         {
-            "cwd": "/home/damiano/Development/C++/SuperMario/bin/Release",
-            "binaryPath": "/home/damiano/Development/C++/SuperMario/bin/Release/SuperMario",
+            "cwd": "/home/damiano/Development/CPlusPlus/SuperMario/bin/Release",
+            "binaryPath": "/home/damiano/Development/CPlusPlus/SuperMario/bin/Release/SuperMario",
             "binaryArgs": []
         }
     ]

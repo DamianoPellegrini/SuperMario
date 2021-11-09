@@ -1,13 +1,19 @@
 #include "pch.hpp"
 
-#include <glad/gl.h>
-#include <GLFW/glfw3.h>
+int main(int argc, char** argv, char** envp) {
+    simdjson::dom::parser parser;
+    auto config = parser.load("config.json").get_object();
 
-int main(int argc, char **argv, char **envp)
-{
+
+    if (auto configError = config.error()) {
+        std::cerr << "Error while loading the configuration: " << configError << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    std::cout << "Configuration loaded successfully" << std::endl;
+
     //* GLFW Initialization
-    if (!glfwInit())
-    {
+    if (!glfwInit()) {
         std::cerr << "Cannot initialize GLFW!" << std::endl;
         return EXIT_FAILURE;
     }
@@ -16,33 +22,32 @@ int main(int argc, char **argv, char **envp)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow *window = glfwCreateWindow(1280, 720, "SuperMario", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(config["width"].get_uint64(), config["height"].get_uint64(), "SuperMario", nullptr, nullptr);
 
     glfwMakeContextCurrent(window);
 
-    if (!gladLoadGL(glfwGetProcAddress))
-    {
+    if (!gladLoadGL(glfwGetProcAddress)) {
         std::cerr << "Cannot initialize GLAD!" << std::endl;
         return EXIT_FAILURE;
     }
 
-    glfwSetWindowSizeCallback(window, [](GLFWwindow *wnds, int width, int height) {
+    glfwSetWindowSizeCallback(window, [](GLFWwindow* wnds, int width, int height) {
         glViewport(0, 0, width, height);
-    });
+        });
 
-    glfwSetErrorCallback([](int error_code, const char *description) {
+    glfwSetErrorCallback([](int error_code, const char* description) {
         std::stringstream ss;
         ss << "OpenGLError[" << error_code << "]: " << description << std::endl;
         std::cerr << ss.str();
-    });
+        });
 
 #pragma region Shader
 
-    const char *vertexShaderSource = "#version 460 core\n"
-                                     "layout (location = 0) in vec3 aPos;\n"
-                                     "void main(){\n"
-                                     "gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-                                     "}";
+    const char* vertexShaderSource = "#version 460 core\n"
+        "layout (location = 0) in vec3 aPos;\n"
+        "void main(){\n"
+        "gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+        "}";
 
     unsigned int vertexShaderId;
     vertexShaderId = glCreateShader(GL_VERTEX_SHADER);
@@ -53,18 +58,17 @@ int main(int argc, char **argv, char **envp)
     int shaderSuccess;
     glGetShaderiv(vertexShaderId, GL_COMPILE_STATUS, &shaderSuccess);
 
-    if (!shaderSuccess)
-    {
+    if (!shaderSuccess) {
         char shaderInfoLog[512];
         glGetShaderInfoLog(vertexShaderId, 512, nullptr, shaderInfoLog);
         std::cerr << "[Error](OpenGL) Compile vertex shader failed: " << shaderInfoLog << std::endl;
     }
 
-    const char *fragmentShaderSource = "#version 460 core\n"
-                                       "out vec4 FragColor;\n"
-                                       "void main(){\n"
-                                       "FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-                                       "}";
+    const char* fragmentShaderSource = "#version 460 core\n"
+        "out vec4 FragColor;\n"
+        "void main(){\n"
+        "FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+        "}";
 
     unsigned int fragmentShaderId;
     fragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
@@ -74,8 +78,7 @@ int main(int argc, char **argv, char **envp)
 
     glGetShaderiv(fragmentShaderId, GL_COMPILE_STATUS, &shaderSuccess);
 
-    if (!shaderSuccess)
-    {
+    if (!shaderSuccess) {
         char shaderInfoLog[512];
         glGetShaderInfoLog(fragmentShaderId, 512, nullptr, shaderInfoLog);
         std::cerr << "[Error](OpenGL) Compile fragment shader failed: " << shaderInfoLog << std::endl;
@@ -90,8 +93,7 @@ int main(int argc, char **argv, char **envp)
 
     glGetProgramiv(shaderProgramId, GL_LINK_STATUS, &shaderSuccess);
 
-    if (!shaderSuccess)
-    {
+    if (!shaderSuccess) {
         char shaderInfoLog[512];
         glGetProgramInfoLog(shaderProgramId, 512, nullptr, shaderInfoLog);
         std::cerr << "[Error](OpenGL) Compile shader program failed: " << shaderInfoLog << std::endl;
@@ -156,8 +158,7 @@ int main(int argc, char **argv, char **envp)
     glEnableVertexAttribArray(0);
 
     //* MAIN LOOP
-    while (!glfwWindowShouldClose(window))
-    {
+    while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
         glClearColor(0.2f, 0.2f, 0.25f, 1.0f);

@@ -23,5 +23,7 @@ project "SuperMario"
         "GL",
         "glfw",
         "glad",
-        "dl"
+        "simdjson",
+        -- "cxxopts",
+        "dl",
     }
