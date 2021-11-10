@@ -26,10 +26,10 @@ apt install libglfw3-dev libsimdjson-dev libglm-dev
 
 ### Configure project
 
-Start by generating the Makefile configuration using premake `premake5 gmake`
+Run these command to get up and running
 
-Next build the project, change the cwd and run it
 ```shell
+premake5 gmake
 make clean
 make config=release all
 cd ./run

@@ -1,6 +1,7 @@
 #include "pch.hpp"
 
 #include "engine/renderer/shader.hpp"
+#include "engine/renderer/buffer.hpp"
 
 int main(int argc, char** argv, char** envp) {
     simdjson::dom::parser parser;
@@ -76,7 +77,7 @@ int main(int argc, char** argv, char** envp) {
         0.0f,
     };
 
-    unsigned int indices[6] = {
+    uint32_t indices[6] = {
         // First triangle
         0,
         1,
@@ -89,30 +90,23 @@ int main(int argc, char** argv, char** envp) {
 
     };
 
-    uint vaoId;
-    glGenVertexArrays(1, &vaoId);
-    glBindVertexArray(vaoId);
-
-    uint vboId;
-    glGenBuffers(1, &vboId);
-    glBindBuffer(GL_ARRAY_BUFFER, vboId);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    uint iboId;
-    glGenBuffers(1, &iboId);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, iboId);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
-    glEnableVertexAttribArray(0);
-
     {
+        uint vaoId;
+        glGenVertexArrays(1, &vaoId);
+        glBindVertexArray(vaoId);
+
+        engine::renderer::vertex_buffer<float> vbo{ vertices, 12, GL_STATIC_DRAW };
+
+        engine::renderer::index_buffer<uint32_t> ibo{ indices, 6, GL_STATIC_DRAW };
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
+        glEnableVertexAttribArray(0);
+
         //* Shader Initialization
         engine::renderer::shader shader{
             "assets/shaders/vertex.glsl",
             "assets/shaders/fragment.glsl"
         };
-        shader.use();
 
         float lastFrameTime = glfwGetTime();
         float test = .0f;
@@ -126,7 +120,8 @@ int main(int argc, char** argv, char** envp) {
             glfwPollEvents();
 
             test += deltaTime;
-            if (test >= .25f) {
+            // Every half second print stats
+            if (test >= 0.5f) {
                 std::cout << "FPS: " << (int32_t)(1.0f / deltaTime) << std::endl;
                 std::cout << "Frametime (ms): " << std::fixed << deltaTime << std::endl;
                 test = .0f;
@@ -141,8 +136,6 @@ int main(int argc, char** argv, char** envp) {
         }
     }
 
-    glDeleteBuffers(1, &iboId);
-    glDeleteBuffers(1, &vboId);
     glfwDestroyWindow(window);
     glfwTerminate();
 
