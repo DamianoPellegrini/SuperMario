@@ -2,13 +2,18 @@
 #include "shader.hpp"
 
 namespace engine::renderer {
+
+    std::string loadShader(const std::filesystem::path& shader_path) {
+        std::ostringstream shader_stream;
+        std::ifstream shader_file{ shader_path };
+        shader_stream << shader_file.rdbuf();
+        shader_file.close();
+        return shader_stream.str();
+    }
+
     shader::shader(const std::filesystem::path& vertex_path, const std::filesystem::path& fragment_path) {
         // Vertex shader
-        std::ostringstream vertex_stream;
-        std::ifstream vertex_file{ vertex_path };
-        vertex_stream << vertex_file.rdbuf();
-        vertex_file.close();
-        auto vertex_source = vertex_stream.str();
+        auto vertex_source = loadShader(vertex_path);
         auto vertex_source_ptr = vertex_source.c_str();
 
         uint32_t vertex_id = glCreateShader(GL_VERTEX_SHADER);
@@ -25,11 +30,7 @@ namespace engine::renderer {
         }
 
         // Fragment shader
-        std::ostringstream fragment_stream;
-        std::ifstream fragment_file{ fragment_path };
-        fragment_stream << fragment_file.rdbuf();
-        fragment_file.close();
-        auto fragment_source = fragment_stream.str();
+        auto fragment_source = loadShader(fragment_path);
         auto fragment_source_ptr = fragment_source.c_str();
 
         uint32_t fragment_id = glCreateShader(GL_FRAGMENT_SHADER);
@@ -57,6 +58,7 @@ namespace engine::renderer {
             throw std::runtime_error{ shaderInfoLog };
         }
 
+        this->use();
         glDeleteShader(vertex_id);
         glDeleteShader(fragment_id);
     }
