@@ -14,7 +14,7 @@ SuperMario clone written in C++ using OpenGL 4.6 targetting mainly Linux-based o
 - opengl `4.6`
 - glfw `^3.3.4`
 - simdjson `^1.0.2`
-- glm `0.9.9.8
+- glm `^0.9.9.8`
 
 #### Linux
 
