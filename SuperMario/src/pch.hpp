@@ -1,5 +1,5 @@
-#ifndef PCH_H
-#define PCH_H
+#ifndef _PCH_HPP
+#define _PCH_HPP
 
 // === STL ===
 #include <iostream>

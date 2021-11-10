@@ -1,5 +1,7 @@
 #include "pch.hpp"
 
+#include "engine/renderer/shader.hpp"
+
 int main(int argc, char** argv, char** envp) {
     simdjson::dom::parser parser;
     auto config = parser.load("config.json").get_object();
@@ -26,6 +28,13 @@ int main(int argc, char** argv, char** envp) {
 
     glfwMakeContextCurrent(window);
 
+    if (config["vsync"].get<bool>()) {
+        glfwSwapInterval(1);
+    }
+    else {
+        glfwSwapInterval(0);
+    }
+
     if (!gladLoadGL(glfwGetProcAddress)) {
         std::cerr << "Cannot initialize GLAD!" << std::endl;
         return EXIT_FAILURE;
@@ -41,69 +50,9 @@ int main(int argc, char** argv, char** envp) {
         std::cerr << ss.str();
         });
 
-#pragma region Shader
-
-    const char* vertexShaderSource = "#version 460 core\n"
-        "layout (location = 0) in vec3 aPos;\n"
-        "void main(){\n"
-        "gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-        "}";
-
-    unsigned int vertexShaderId;
-    vertexShaderId = glCreateShader(GL_VERTEX_SHADER);
-
-    glShaderSource(vertexShaderId, 1, &vertexShaderSource, nullptr);
-    glCompileShader(vertexShaderId);
-
-    int shaderSuccess;
-    glGetShaderiv(vertexShaderId, GL_COMPILE_STATUS, &shaderSuccess);
-
-    if (!shaderSuccess) {
-        char shaderInfoLog[512];
-        glGetShaderInfoLog(vertexShaderId, 512, nullptr, shaderInfoLog);
-        std::cerr << "[Error](OpenGL) Compile vertex shader failed: " << shaderInfoLog << std::endl;
-    }
-
-    const char* fragmentShaderSource = "#version 460 core\n"
-        "out vec4 FragColor;\n"
-        "void main(){\n"
-        "FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-        "}";
-
-    unsigned int fragmentShaderId;
-    fragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
-
-    glShaderSource(fragmentShaderId, 1, &fragmentShaderSource, nullptr);
-    glCompileShader(fragmentShaderId);
-
-    glGetShaderiv(fragmentShaderId, GL_COMPILE_STATUS, &shaderSuccess);
-
-    if (!shaderSuccess) {
-        char shaderInfoLog[512];
-        glGetShaderInfoLog(fragmentShaderId, 512, nullptr, shaderInfoLog);
-        std::cerr << "[Error](OpenGL) Compile fragment shader failed: " << shaderInfoLog << std::endl;
-    }
-
-    unsigned int shaderProgramId;
-    shaderProgramId = glCreateProgram();
-
-    glAttachShader(shaderProgramId, vertexShaderId);
-    glAttachShader(shaderProgramId, fragmentShaderId);
-    glLinkProgram(shaderProgramId);
-
-    glGetProgramiv(shaderProgramId, GL_LINK_STATUS, &shaderSuccess);
-
-    if (!shaderSuccess) {
-        char shaderInfoLog[512];
-        glGetProgramInfoLog(shaderProgramId, 512, nullptr, shaderInfoLog);
-        std::cerr << "[Error](OpenGL) Compile shader program failed: " << shaderInfoLog << std::endl;
-    }
-
-    glUseProgram(shaderProgramId);
-    glDeleteShader(vertexShaderId);
-    glDeleteShader(fragmentShaderId);
-
-#pragma endregion
+    // Prints driver info
+    std::cout << glGetString(GL_VENDOR) << std::endl;
+    std::cout << glGetString(GL_RENDERER) << std::endl;
 
     float vertices[12] = {
         // Top left
@@ -157,18 +106,43 @@ int main(int argc, char** argv, char** envp) {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
     glEnableVertexAttribArray(0);
 
-    //* MAIN LOOP
-    while (!glfwWindowShouldClose(window)) {
-        glfwPollEvents();
+    {
+        //* Shader Initialization
+        engine::renderer::shader shader{
+            "assets/shaders/vertex.glsl",
+            "assets/shaders/fragment.glsl"
+        };
+        shader.use();
 
-        glClearColor(0.2f, 0.2f, 0.25f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        float lastFrameTime = glfwGetTime();
+        float test = .0f;
+        //* MAIN LOOP
+        while (!glfwWindowShouldClose(window)) {
 
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            float currentFrameTime = glfwGetTime();
+            float deltaTime = currentFrameTime - lastFrameTime;
+            lastFrameTime = currentFrameTime;
 
-        glfwSwapBuffers(window);
+            glfwPollEvents();
+
+            test += deltaTime;
+            if (test >= .25f) {
+                std::cout << "FPS: " << (int32_t)(1.0f / deltaTime) << std::endl;
+                std::cout << "Frametime (ms): " << std::fixed << deltaTime << std::endl;
+                test = .0f;
+            }
+
+            glClearColor(.2f * abs(sin(glfwGetTime())), .2f, .25f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+            glfwSwapBuffers(window);
+        }
     }
 
+    glDeleteBuffers(1, &iboId);
+    glDeleteBuffers(1, &vboId);
     glfwDestroyWindow(window);
     glfwTerminate();
 

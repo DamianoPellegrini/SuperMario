@@ -24,6 +24,5 @@ project "SuperMario"
         "glfw",
         "glad",
         "simdjson",
-        -- "cxxopts",
         "dl",
     }
