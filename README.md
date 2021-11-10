@@ -4,22 +4,24 @@ SuperMario clone written in C++ using OpenGL 4.6 targetting mainly Linux-based o
 
 ## Build instructions
 
-### Requirements (sources not included)
+### Requirements
 
-- premake5 `^alpha16`
+- premake5
+- gmake
+
+### Dependencies
+
 - opengl `4.6`
 - glfw `^3.3.4`
-- cxxopts `^3.0.0`
 - simdjson `^1.0.2`
-- glm `0.9.9.8`
-- gmake
+- glm `0.9.9.8
 
 #### Linux
 
-On Debian based systems, install GLFW by using:
+On Debian based systems, install the dependencies by using:
 
 ```shell
-apt install libglfw3-dev
+apt install libglfw3-dev libsimdjson-dev libglm-dev
 ```
 
 ### Configure project
