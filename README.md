@@ -32,6 +32,5 @@ Run these command to get up and running
 premake5 gmake
 make clean
 make config=release all
-cd ./run
-../bin/Release/SuperMario
+(cd ./run && exec ../bin/Release/SuperMario)
 ```

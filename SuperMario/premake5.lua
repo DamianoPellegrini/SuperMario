@@ -25,4 +25,5 @@ project "SuperMario"
         "glad",
         "simdjson",
         "dl",
+        "pthread",
     }

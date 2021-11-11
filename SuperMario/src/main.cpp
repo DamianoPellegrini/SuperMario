@@ -55,35 +55,35 @@ int main(int argc, char** argv, char** envp) {
     std::cout << glGetString(GL_VENDOR) << std::endl;
     std::cout << glGetString(GL_RENDERER) << std::endl;
 
-    float vertices[12] = {
+    float vertices[15] = {
         // Top left
-        -0.5f,
-        0.5f,
+        -0.75f,
+        0.75f,
         0.0f,
 
         // Top right
-        0.5f,
-        0.5f,
+        0.75f,
+        0.75f,
         0.0f,
 
         // Bottom right
-        0.5f,
-        -0.5f,
+        0.75f,
+        -0.75f,
         0.0f,
 
-        //Bottom left
-        -0.5f,
-        -0.5f,
+        // Bottom left
+        -0.75f,
+        -0.75f,
         0.0f,
     };
 
     uint32_t indices[6] = {
-        // First triangle
+        // Upper triangle
         0,
         1,
         3,
 
-        // Second triangle
+        // Lower triangle
         1,
         2,
         3,
@@ -95,7 +95,7 @@ int main(int argc, char** argv, char** envp) {
         glGenVertexArrays(1, &vaoId);
         glBindVertexArray(vaoId);
 
-        engine::renderer::vertex_buffer<float> vbo{ vertices, 12, GL_STATIC_DRAW };
+        engine::renderer::vertex_buffer<float> vbo{ vertices, 15, GL_STATIC_DRAW };
 
         engine::renderer::index_buffer<uint32_t> ibo{ indices, 6, GL_STATIC_DRAW };
 
@@ -127,7 +127,7 @@ int main(int argc, char** argv, char** envp) {
                 test = .0f;
             }
 
-            glClearColor(.2f * abs(sin(glfwGetTime())), .2f, .25f, 1.0f);
+            glClearColor(.2f /* * abs(sin(glfwGetTime())) */, .2f, .25f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
 
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
