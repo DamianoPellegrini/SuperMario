@@ -70,7 +70,6 @@ namespace engine::renderer {
             throw std::runtime_error{ shaderInfoLog };
         }
 
-        this->use();
         glDeleteShader(vertex_id);
         glDeleteShader(fragment_id);
     }
@@ -82,4 +81,4 @@ namespace engine::renderer {
     void shader::use() const {
         glUseProgram(this->shader_id);
     }
-}
+} // namespace engine::renderer

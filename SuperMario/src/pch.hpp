@@ -7,34 +7,50 @@
 #include <fstream>
 #include <filesystem>
 
+// === STL Containers ===
+// #include <array>
+#include <bitset>
+// #include <deque>
+// #include <forward_list>
+// #include <list>
+// #include <map>
+// #include <queue>
+// #include <set>
+// #include <stack>
+// #include <unordered_map>
+// #include <unordered_set>
 #include <vector>
-#include <array>
-#include <unordered_map>
-#include <unordered_set>
-#include <queue>
-#include <stack>
-#include <list>
+#include <iterator>
+// #include <initializer_list>
+// #include <tuple>
+// #include <span>
+
+// === STL Atomics and threading ===
+// #include <atomic>
+// #include <condition_variable>
+#include <future>
+// #include <mutex>
+// #include <thread>
+
+// === STL Memory ===
+#include <new>
+#include <memory>
 
 #include <string>
 #include <string_view>
-
-#include <chrono>
 #include <algorithm>
+// #include <any>
+#include <chrono>
 #include <functional>
-#include <future>
-#include <memory>
-#include <optional>
-#include <any>
-#include <thread>
-#include <atomic>
-#include <bitset>
-#include <locale>
-#include <deque>
+// #include <optional>
+// #include <locale>
 #include <limits>
-#include <new>
-#include <mutex>
 #include <random>
-#include <span>
+// #include <ratio>
+// #include <complex>
+// #include <regex>
+// #include <stdexcept>
+// #include <system_error>
 
 // === THIRD PARTY ===
 #include <glad/gl.h>

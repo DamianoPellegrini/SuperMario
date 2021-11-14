@@ -4,6 +4,9 @@
 #include "engine/renderer/buffer.hpp"
 
 int main(int argc, char** argv, char** envp) {
+
+    std::clog << "Starting..." << std::endl;
+
     simdjson::dom::parser parser;
     auto config = parser.load("config.json").get_object();
 
@@ -13,7 +16,7 @@ int main(int argc, char** argv, char** envp) {
         return EXIT_FAILURE;
     }
 
-    std::cout << "Configuration loaded successfully" << std::endl;
+    std::clog << "Configuration loaded successfully" << std::endl;
 
     //* GLFW Initialization
     if (!glfwInit()) {
@@ -52,10 +55,10 @@ int main(int argc, char** argv, char** envp) {
         });
 
     // Prints driver info
-    std::cout << glGetString(GL_VENDOR) << std::endl;
-    std::cout << glGetString(GL_RENDERER) << std::endl;
+    std::clog << glGetString(GL_VENDOR) << std::endl;
+    std::clog << glGetString(GL_RENDERER) << std::endl;
 
-    float vertices[15] = {
+    float vertices[12] = {
         // Top left
         -0.75f,
         0.75f,
@@ -95,7 +98,7 @@ int main(int argc, char** argv, char** envp) {
         glGenVertexArrays(1, &vaoId);
         glBindVertexArray(vaoId);
 
-        engine::renderer::vertex_buffer<float> vbo{ vertices, 15, GL_STATIC_DRAW };
+        engine::renderer::vertex_buffer<float> vbo{ vertices, 12, GL_STATIC_DRAW };
 
         engine::renderer::index_buffer<uint32_t> ibo{ indices, 6, GL_STATIC_DRAW };
 
@@ -107,6 +110,7 @@ int main(int argc, char** argv, char** envp) {
             "assets/shaders/vertex.glsl",
             "assets/shaders/fragment.glsl"
         };
+        shader.use();
 
         float lastFrameTime = glfwGetTime();
         float test = .0f;
@@ -126,6 +130,10 @@ int main(int argc, char** argv, char** envp) {
                 std::cout << "Frametime (ms): " << std::fixed << deltaTime << std::endl;
                 test = .0f;
             }
+
+            // glUniform3f(glGetUniformLocation(shader.handle(), "tint"), 0.0f, 0.0f, abs(sin(currentFrameTime)) * 0.5f);
+
+            glfwPollEvents();
 
             glClearColor(.2f /* * abs(sin(glfwGetTime())) */, .2f, .25f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);

@@ -1,6 +1,6 @@
 # SuperMario
 
-SuperMario clone written in C++ using OpenGL 4.6 targetting mainly Linux-based operating systems.
+SuperMario clone written in C++20 using OpenGL 4.6 targetting mainly Linux-based operating systems.
 
 ## Build instructions
 
@@ -18,7 +18,7 @@ SuperMario clone written in C++ using OpenGL 4.6 targetting mainly Linux-based o
 
 #### Linux
 
-On Debian based systems, install the dependencies by using:
+On Debian based systems, install the dependencies by using the following command:
 
 ```shell
 apt install libglfw3-dev libsimdjson-dev libglm-dev
