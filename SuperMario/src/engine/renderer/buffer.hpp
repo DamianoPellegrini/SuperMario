@@ -21,7 +21,9 @@ namespace engine::renderer {
     buffer<target, T>::buffer(const T* data, size_t count, GLenum usage) {
         glGenBuffers(1, &buffer_id);
         this->bind();
+        // Write to the currenctly bound 'target' buffer
         glBufferData(target, count * sizeof(T), data, usage);
+        this->unbind();
     }
 
     template<GLenum target, class T>

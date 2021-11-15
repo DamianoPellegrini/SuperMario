@@ -2,6 +2,7 @@
 
 #include "engine/renderer/shader.hpp"
 #include "engine/renderer/buffer.hpp"
+#include "engine/renderer/vertex_array.hpp"
 
 int main(int argc, char** argv, char** envp) {
 
@@ -94,16 +95,17 @@ int main(int argc, char** argv, char** envp) {
     };
 
     {
-        uint vaoId;
-        glGenVertexArrays(1, &vaoId);
-        glBindVertexArray(vaoId);
+        engine::renderer::vertex_array vao{};
+        vao.bind();
+        vao.enable_attribute(0);
 
         engine::renderer::vertex_buffer<float> vbo{ vertices, 12, GL_STATIC_DRAW };
+        vbo.bind();
+        vao.define_attribute(vbo, 0, 3, false, 3 * sizeof(float), 0);
 
         engine::renderer::index_buffer<uint32_t> ibo{ indices, 6, GL_STATIC_DRAW };
-
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
-        glEnableVertexAttribArray(0);
+        // ibo.bind(); // Same as below
+        vao.bind_element_buffer(ibo);
 
         //* Shader Initialization
         engine::renderer::shader shader{
@@ -121,7 +123,6 @@ int main(int argc, char** argv, char** envp) {
             float deltaTime = currentFrameTime - lastFrameTime;
             lastFrameTime = currentFrameTime;
 
-            glfwPollEvents();
 
             test += deltaTime;
             // Every half second print stats
