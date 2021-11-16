@@ -49,6 +49,19 @@ int main(int argc, char** argv, char** envp) {
         glViewport(0, 0, width, height);
         });
 
+    glfwSetKeyCallback(window, [](GLFWwindow* wnds, int key, int scancode, int action, int mods) {
+        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+            glfwSetWindowShouldClose(wnds, true);
+        }
+
+        // static bool state = false;
+
+        // if (key == GLFW_KEY_V && action == GLFW_PRESS) {
+        //     state = !state;
+        //     glfwSwapInterval(state);
+        // }
+        });
+
     glfwSetErrorCallback([](int error_code, const char* description) {
         std::stringstream ss;
         ss << "OpenGLError[" << error_code << "]: " << description << std::endl;
@@ -59,26 +72,20 @@ int main(int argc, char** argv, char** envp) {
     std::clog << glGetString(GL_VENDOR) << std::endl;
     std::clog << glGetString(GL_RENDERER) << std::endl;
 
-    float vertices[12] = {
+    float vertices[24] = {
         // Top left
-        -0.75f,
-        0.75f,
-        0.0f,
+        -0.75f, 0.75f, 0.0f,
+        1.0f, 0.0f, 0.0f,
 
         // Top right
-        0.75f,
-        0.75f,
-        0.0f,
-
+        0.75f, 0.75f, 0.0f,
+        0.0f, 1.0f, 0.0f,
         // Bottom right
-        0.75f,
-        -0.75f,
-        0.0f,
-
+        0.75f, -0.75f, 0.0f,
+        0.0f, 0.0f, 1.0f,
         // Bottom left
-        -0.75f,
-        -0.75f,
-        0.0f,
+        -0.75f, -0.75f, 0.0f,
+        1.0f, 1.0f, 0.0f
     };
 
     uint32_t indices[6] = {
@@ -97,20 +104,22 @@ int main(int argc, char** argv, char** envp) {
     {
         engine::renderer::vertex_array vao{};
         vao.bind();
-        vao.enable_attribute(0);
 
-        engine::renderer::vertex_buffer<float> vbo{ vertices, 12, GL_STATIC_DRAW };
+        engine::renderer::vertex_buffer<float> vbo{ vertices, sizeof(vertices) / sizeof(float), GL_STATIC_DRAW };
         vbo.bind();
-        vao.define_attribute(vbo, 0, 3, false, 3 * sizeof(float), 0);
+        vao.define_attribute(vbo, 0, 3, false, 6 * sizeof(float), 0);
+        vao.define_attribute(vbo, 1, 3, false, 6 * sizeof(float), 3 * sizeof(float));
+        vao.enable_attribute(0);
+        vao.enable_attribute(1);
 
-        engine::renderer::index_buffer<uint32_t> ibo{ indices, 6, GL_STATIC_DRAW };
+        engine::renderer::index_buffer<uint32_t> ibo{ indices, sizeof(indices) / sizeof(uint32_t), GL_STATIC_DRAW };
         // ibo.bind(); // Same as below
         vao.bind_element_buffer(ibo);
 
         //* Shader Initialization
         engine::renderer::shader shader{
-            "assets/shaders/vertex.glsl",
-            "assets/shaders/fragment.glsl"
+            "assets/shaders/basic.vs",
+            "assets/shaders/basic.fs"
         };
         shader.use();
 
@@ -139,7 +148,7 @@ int main(int argc, char** argv, char** envp) {
             glClearColor(.2f /* * abs(sin(glfwGetTime())) */, .2f, .25f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
 
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(uint32_t), GL_UNSIGNED_INT, 0);
 
             glfwSwapBuffers(window);
         }

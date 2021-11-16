@@ -1,7 +1,7 @@
 #include "pch.hpp"
 #include "shader.hpp"
 
-#define SHADER_ASYNC 0
+#define SHADER_ASYNC 1
 
 namespace engine::renderer {
 

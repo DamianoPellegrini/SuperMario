@@ -23,7 +23,7 @@ namespace engine::renderer {
         void unbind_element_buffer() const;
 
         template <class T>
-        void define_attribute(const vertex_buffer<T>& buffer, const size_t index, const size_t size, const bool normalized, const size_t stride, const size_t offset);
+        void define_attribute(const vertex_buffer<T>& buffer, const size_t index, const size_t count, const bool normalized, const size_t stride, const size_t offset);
 
         void enable_attribute(const size_t index) const;
         void disable_attribute(const size_t index) const;
@@ -37,16 +37,16 @@ namespace engine::renderer {
     }
 
     template <class T>
-    void vertex_array::define_attribute(const vertex_buffer<T>& buffer, const size_t index, const size_t size, const bool normalized, const size_t stride, const size_t offset) {
+    void vertex_array::define_attribute(const vertex_buffer<T>& buffer, const size_t index, const size_t count, const bool normalized, const size_t stride, const size_t offset) {
         if (index >= max_vertex_attributes) {
             throw std::runtime_error("Index out of range!");
         }
 
-        // Bind out VBO to that index
+        // Bind VBO to a binding index
         glBindVertexBuffer(this->bound_attribute_index, buffer.id(), offset, stride);
 
         // Define the format in the VAO
-        glVertexArrayAttribFormat(array_id, index, size, util::getGLType<T>(), normalized ? GL_TRUE : GL_FALSE, offset);
+        glVertexArrayAttribFormat(array_id, index, count, util::getGLType<T>(), normalized ? GL_TRUE : GL_FALSE, 0);
         glVertexArrayAttribBinding(array_id, index, this->bound_attribute_index);
 
         this->bound_attribute_index++;
