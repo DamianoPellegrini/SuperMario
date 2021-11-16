@@ -55,7 +55,7 @@
 // === THIRD PARTY ===
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
-#include <cxxopts.hpp>
+// #include <cxxopts.hpp>
 #include <simdjson.h>
 
 #endif
