@@ -75,17 +75,22 @@ int main(int argc, char** argv, char** envp) {
     float vertices[24] = {
         // Top left
         -0.75f, 0.75f, 0.0f,
-        1.0f, 0.0f, 0.0f,
 
         // Top right
         0.75f, 0.75f, 0.0f,
-        0.0f, 1.0f, 0.0f,
+
         // Bottom right
         0.75f, -0.75f, 0.0f,
-        0.0f, 0.0f, 1.0f,
+
         // Bottom left
         -0.75f, -0.75f, 0.0f,
-        1.0f, 1.0f, 0.0f
+    };
+
+    float colors[12] = {
+        1.0f, 1.0f, 0.0f,
+        1.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 1.0f,
     };
 
     uint32_t indices[6] = {
@@ -105,16 +110,18 @@ int main(int argc, char** argv, char** envp) {
         engine::renderer::vertex_array vao{};
         vao.bind();
 
-        engine::renderer::vertex_buffer<float> vbo{ vertices, sizeof(vertices) / sizeof(float), GL_STATIC_DRAW };
-        vbo.bind();
-        vao.define_attribute(vbo, 0, 3, false, 6 * sizeof(float), 0);
-        vao.define_attribute(vbo, 1, 3, false, 6 * sizeof(float), 3 * sizeof(float));
+        engine::renderer::vertex_buffer<float> positions_buffer{ vertices, sizeof(vertices) / sizeof(float), GL_STATIC_DRAW };
+        // vbo.bind();
+        vao.define_attribute(positions_buffer, 0, 3, false, 3 * sizeof(float), 0);
         vao.enable_attribute(0);
+
+        engine::renderer::vertex_buffer<float> colors_buffer{ colors, sizeof(colors) / sizeof(float), GL_STATIC_DRAW };
+        vao.define_attribute(colors_buffer, 1, 3, false, 3 * sizeof(float), 0);
         vao.enable_attribute(1);
 
         engine::renderer::index_buffer<uint32_t> ibo{ indices, sizeof(indices) / sizeof(uint32_t), GL_STATIC_DRAW };
         // ibo.bind(); // Same as below
-        vao.bind_element_buffer(ibo);
+        vao.bind_index_buffer(ibo);
 
         //* Shader Initialization
         engine::renderer::shader shader{
