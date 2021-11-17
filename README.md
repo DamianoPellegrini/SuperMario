@@ -11,7 +11,7 @@ SuperMario clone written in C++20 using OpenGL 4.6 targetting mainly Linux-based
 
 ### Dependencies
 
-- opengl `4.6`
+- opengl `4.6` + glad for loading
 - glfw `^3.3.4`
 - simdjson `^1.0.2`
 - glm `^0.9.9.8`

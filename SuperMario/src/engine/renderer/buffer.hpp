@@ -19,11 +19,16 @@ namespace engine::renderer {
 
     template<GLenum target, class T>
     buffer<target, T>::buffer(const T* data, size_t count, GLenum usage) {
+#if GL_ARB_direct_state_access
+        glCreateBuffers(1, &buffer_id);
+        glNamedBufferStorage(this->buffer_id, count * sizeof(T), data, usage);
+#else
         glGenBuffers(1, &buffer_id);
         this->bind();
         // Write to the currenctly bound 'target' buffer
-        glBufferData(target, count * sizeof(T), data, usage);
+        glBufferStorage(target, count * sizeof(T), data, usage);
         this->unbind();
+#endif
     }
 
     template<GLenum target, class T>

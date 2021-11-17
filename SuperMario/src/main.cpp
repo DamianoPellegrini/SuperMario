@@ -27,6 +27,7 @@ int main(int argc, char** argv, char** envp) {
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     GLFWwindow* window = glfwCreateWindow(config["width"].get_uint64(), config["height"].get_uint64(), "SuperMario", nullptr, nullptr);
@@ -39,6 +40,7 @@ int main(int argc, char** argv, char** envp) {
     else {
         glfwSwapInterval(0);
     }
+    
 
     if (!gladLoadGL(glfwGetProcAddress)) {
         std::cerr << "Cannot initialize GLAD!" << std::endl;
@@ -54,11 +56,18 @@ int main(int argc, char** argv, char** envp) {
             glfwSetWindowShouldClose(wnds, true);
         }
 
-        // static bool state = false;
+        // static bool state = true;
 
         // if (key == GLFW_KEY_V && action == GLFW_PRESS) {
         //     state = !state;
         //     glfwSwapInterval(state);
+        // }
+
+        // static bool state2 = false;
+
+        // if (key == GLFW_KEY_B && action == GLFW_PRESS) {
+        //     state2 = !state2;
+        //     glPolygonMode(GL_FRONT_AND_BACK, state2 ? GL_LINE : GL_FILL);
         // }
         });
 
@@ -68,6 +77,45 @@ int main(int argc, char** argv, char** envp) {
         std::cerr << ss.str();
         });
 
+    glEnable(GL_DEBUG_OUTPUT);
+    glDebugMessageCallback([](GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, GLchar const* message, void const* user_param) {
+        auto const src_str = [source]() {
+            switch (source) {
+            case GL_DEBUG_SOURCE_API: return "API";
+            case GL_DEBUG_SOURCE_WINDOW_SYSTEM: return "WINDOW SYSTEM";
+            case GL_DEBUG_SOURCE_SHADER_COMPILER: return "SHADER COMPILER";
+            case GL_DEBUG_SOURCE_THIRD_PARTY: return "THIRD PARTY";
+            case GL_DEBUG_SOURCE_APPLICATION: return "APPLICATION";
+            case GL_DEBUG_SOURCE_OTHER: return "OTHER";
+            default: return "OTHER";
+            }
+        }();
+
+        auto const type_str = [type]() {
+            switch (type) {
+            case GL_DEBUG_TYPE_ERROR: return "ERROR";
+            case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: return "DEPRECATED_BEHAVIOR";
+            case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR: return "UNDEFINED_BEHAVIOR";
+            case GL_DEBUG_TYPE_PORTABILITY: return "PORTABILITY";
+            case GL_DEBUG_TYPE_PERFORMANCE: return "PERFORMANCE";
+            case GL_DEBUG_TYPE_MARKER: return "MARKER";
+            case GL_DEBUG_TYPE_OTHER: return "OTHER";
+            default: return "OTHER";
+            }
+        }();
+
+        auto const severity_str = [severity]() {
+            switch (severity) {
+            case GL_DEBUG_SEVERITY_NOTIFICATION: return "NOTIFICATION";
+            case GL_DEBUG_SEVERITY_LOW: return "LOW";
+            case GL_DEBUG_SEVERITY_MEDIUM: return "MEDIUM";
+            case GL_DEBUG_SEVERITY_HIGH: return "HIGH";
+            default: return "UNSPECIFIED";
+            }
+        }();
+        std::cout << src_str << ", " << type_str << ", " << severity_str << ", " << id << ": " << message << '\n';
+        }, nullptr);
+
     // Prints driver info
     std::clog << glGetString(GL_VENDOR) << std::endl;
     std::clog << glGetString(GL_RENDERER) << std::endl;
@@ -75,23 +123,27 @@ int main(int argc, char** argv, char** envp) {
     float vertices[24] = {
         // Top left
         -0.75f, 0.75f, 0.0f,
+        1.0f, 1.0f, 0.0f,
 
         // Top right
         0.75f, 0.75f, 0.0f,
+        1.0f, 0.0f, 0.0f,
 
         // Bottom right
         0.75f, -0.75f, 0.0f,
+        0.0f, 1.0f, 0.0f,
 
         // Bottom left
         -0.75f, -0.75f, 0.0f,
-    };
-
-    float colors[12] = {
-        1.0f, 1.0f, 0.0f,
-        1.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f,
         0.0f, 0.0f, 1.0f,
     };
+
+    // float colors[12] = {
+    //     1.0f, 1.0f, 0.0f,
+    //     1.0f, 0.0f, 0.0f,
+    //     0.0f, 1.0f, 0.0f,
+    //     0.0f, 0.0f, 1.0f,
+    // };
 
     uint32_t indices[6] = {
         // Upper triangle
@@ -108,18 +160,19 @@ int main(int argc, char** argv, char** envp) {
 
     {
         engine::renderer::vertex_array vao{};
-        vao.bind();
 
-        engine::renderer::vertex_buffer<float> positions_buffer{ vertices, sizeof(vertices) / sizeof(float), GL_STATIC_DRAW };
+        engine::renderer::vertex_buffer<float> vbo{ vertices, sizeof(vertices) / sizeof(float), GL_DYNAMIC_STORAGE_BIT };
         // vbo.bind();
-        vao.define_attribute(positions_buffer, 0, 3, false, 3 * sizeof(float), 0);
+        vao.define_attribute(vbo, 0, 3, false, 6 * sizeof(float), 0);
         vao.enable_attribute(0);
-
-        engine::renderer::vertex_buffer<float> colors_buffer{ colors, sizeof(colors) / sizeof(float), GL_STATIC_DRAW };
-        vao.define_attribute(colors_buffer, 1, 3, false, 3 * sizeof(float), 0);
+        vao.define_attribute(vbo, 1, 3, false, 6 * sizeof(float), 3 * sizeof(float));
         vao.enable_attribute(1);
 
-        engine::renderer::index_buffer<uint32_t> ibo{ indices, sizeof(indices) / sizeof(uint32_t), GL_STATIC_DRAW };
+        // engine::renderer::vertex_buffer<float> colors_buffer{ colors, sizeof(colors) / sizeof(float), GL_STATIC_DRAW };
+        // vao.define_attribute(colors_buffer, 1, 3, false, 3 * sizeof(float), 0);
+        // vao.enable_attribute(1);
+///
+        engine::renderer::index_buffer<uint32_t> ibo{ indices, sizeof(indices) / sizeof(uint32_t), GL_DYNAMIC_STORAGE_BIT };
         // ibo.bind(); // Same as below
         vao.bind_index_buffer(ibo);
 
@@ -155,7 +208,9 @@ int main(int argc, char** argv, char** envp) {
             glClearColor(.2f /* * abs(sin(glfwGetTime())) */, .2f, .25f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
 
+            vao.bind();
             glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(uint32_t), GL_UNSIGNED_INT, 0);
+            vao.unbind();
 
             glfwSwapBuffers(window);
         }
