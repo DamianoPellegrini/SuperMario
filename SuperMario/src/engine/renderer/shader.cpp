@@ -78,7 +78,33 @@ namespace engine::renderer {
         glDeleteProgram(this->shader_id);
     }
 
-    void shader::use() const {
+    void shader::bind() const {
         glUseProgram(this->shader_id);
     }
+
+    void shader::unbind() const {
+        glUseProgram(0);
+    }
+
+    template<>
+    void shader::set_uniform<float>(const std::string_view name, const float& value) const {
+        glUniform1f(glGetUniformLocation(this->shader_id, name.data()), value);
+    }
+
+    template<>
+    void shader::set_uniform<glm::vec2>(const std::string_view name, const glm::vec2& value) const {
+        glUniform2fv(glGetUniformLocation(this->shader_id, name.data()), 1, &value[0]);
+    }
+
+    template<>
+    void shader::set_uniform<glm::vec3>(const std::string_view name, const glm::vec3& value) const {
+        glUniform3fv(glGetUniformLocation(this->shader_id, name.data()), 1, &value[0]);
+    }
+
+    // template<>
+    // const float shader::get_uniform<float>(const std::string_view name) const {
+    //     glGetUniformfv(this->shader_id, name.data(), 1);
+    // }
+
+
 } // namespace engine::renderer

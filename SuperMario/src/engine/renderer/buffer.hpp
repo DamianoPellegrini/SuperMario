@@ -6,13 +6,14 @@ namespace engine::renderer {
     class buffer {
     protected:
         uint32_t buffer_id;
-
+        void* gpu_memory_ptr;
     public:
         buffer(const T* data, size_t count, GLenum usage = GL_STATIC_DRAW);
         virtual ~buffer();
 
         virtual void bind() const;
         virtual void unbind() const;
+        virtual void write(const T* data, const size_t size) const;
 
         inline virtual uint32_t id() const { return buffer_id; };
     };
@@ -22,6 +23,7 @@ namespace engine::renderer {
 #if GL_ARB_direct_state_access
         glCreateBuffers(1, &buffer_id);
         glNamedBufferStorage(this->buffer_id, count * sizeof(T), data, usage);
+        this->gpu_memory_ptr = glMapNamedBuffer(this->buffer_id, GL_READ_WRITE);
 #else
         glGenBuffers(1, &buffer_id);
         this->bind();
@@ -42,7 +44,17 @@ namespace engine::renderer {
     }
 
     template<GLenum target, class T>
+    void buffer<target, T>::write(const T* data, const size_t size) const {
+        if (!this->gpu_memory_ptr) return;
+        memcpy(this->gpu_memory_ptr, data, size);
+    }
+
+    template<GLenum target, class T>
     buffer<target, T>::~buffer() {
+        if (this->gpu_memory_ptr) {
+            glUnmapNamedBuffer(this->buffer_id);
+            this->gpu_memory_ptr = nullptr;
+        }
         glDeleteBuffers(1, &buffer_id);
     }
 

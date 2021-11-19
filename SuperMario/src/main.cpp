@@ -4,6 +4,13 @@
 #include "engine/renderer/buffer.hpp"
 #include "engine/renderer/vertex_array.hpp"
 
+struct WNDPTR {
+    engine::renderer::vertex_buffer<float>& vb;
+    const float* vertices;
+    const float* vertices2;
+    const size_t vertex_size;
+};
+
 int main(int argc, char** argv, char** envp) {
 
     std::clog << "Starting..." << std::endl;
@@ -40,7 +47,7 @@ int main(int argc, char** argv, char** envp) {
     else {
         glfwSwapInterval(0);
     }
-    
+
 
     if (!gladLoadGL(glfwGetProcAddress)) {
         std::cerr << "Cannot initialize GLAD!" << std::endl;
@@ -55,7 +62,7 @@ int main(int argc, char** argv, char** envp) {
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
             glfwSetWindowShouldClose(wnds, true);
         }
-
+        // glfwGetWindowUserPointer(wnds);
         // static bool state = true;
 
         // if (key == GLFW_KEY_V && action == GLFW_PRESS) {
@@ -69,6 +76,17 @@ int main(int argc, char** argv, char** envp) {
         //     state2 = !state2;
         //     glPolygonMode(GL_FRONT_AND_BACK, state2 ? GL_LINE : GL_FILL);
         // }
+
+        if (WNDPTR* ptr = (WNDPTR*)glfwGetWindowUserPointer(wnds)) {
+
+            static bool state3 = false;
+
+            if (key == GLFW_KEY_N && action == GLFW_PRESS) {
+                state3 = !state3;
+                auto writes = state3 ? ptr->vertices2 : ptr->vertices;
+                ptr->vb.write(writes, ptr->vertex_size * sizeof(float));
+            }
+        }
         });
 
     glfwSetErrorCallback([](int error_code, const char* description) {
@@ -138,6 +156,24 @@ int main(int argc, char** argv, char** envp) {
         0.0f, 0.0f, 1.0f,
     };
 
+    float vertices2[24] = {
+        // Top left
+        -0.5f, 0.5f, 0.0f,
+        0.0f, 0.0f, 1.0f,
+
+        // Top right
+        0.5f, 0.5f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+
+        // Bottom right
+        0.5f, -0.5f, 0.0f,
+        1.0f, 1.0f, 0.0f,
+
+        // Bottom left
+        -0.5f, -0.5f, 0.0f,
+        1.0f, 0.0f, 0.0f,
+    };
+
     // float colors[12] = {
     //     1.0f, 1.0f, 0.0f,
     //     1.0f, 0.0f, 0.0f,
@@ -159,9 +195,10 @@ int main(int argc, char** argv, char** envp) {
     };
 
     {
+        //* VAO Configuration
         engine::renderer::vertex_array vao{};
 
-        engine::renderer::vertex_buffer<float> vbo{ vertices, sizeof(vertices) / sizeof(float), GL_DYNAMIC_STORAGE_BIT };
+        engine::renderer::vertex_buffer<float> vbo{ vertices, sizeof(vertices) / sizeof(float), GL_DYNAMIC_STORAGE_BIT | GL_MAP_WRITE_BIT | GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT };
         // vbo.bind();
         vao.define_attribute(vbo, 0, 3, false, 6 * sizeof(float), 0);
         vao.enable_attribute(0);
@@ -171,17 +208,23 @@ int main(int argc, char** argv, char** envp) {
         // engine::renderer::vertex_buffer<float> colors_buffer{ colors, sizeof(colors) / sizeof(float), GL_STATIC_DRAW };
         // vao.define_attribute(colors_buffer, 1, 3, false, 3 * sizeof(float), 0);
         // vao.enable_attribute(1);
-///
+
         engine::renderer::index_buffer<uint32_t> ibo{ indices, sizeof(indices) / sizeof(uint32_t), GL_DYNAMIC_STORAGE_BIT };
         // ibo.bind(); // Same as below
         vao.bind_index_buffer(ibo);
 
+        vao.bind();
+
+        auto aa = WNDPTR{ .vb = vbo, .vertices = vertices, .vertices2 = vertices2, .vertex_size = 24 };
+
+        glfwSetWindowUserPointer(window, &aa);
+
         //* Shader Initialization
-        engine::renderer::shader shader{
+        engine::renderer::shader basic_shader{
             "assets/shaders/basic.vs",
             "assets/shaders/basic.fs"
         };
-        shader.use();
+        basic_shader.bind();
 
         float lastFrameTime = glfwGetTime();
         float test = .0f;
@@ -201,16 +244,14 @@ int main(int argc, char** argv, char** envp) {
                 test = .0f;
             }
 
-            // glUniform3f(glGetUniformLocation(shader.handle(), "tint"), 0.0f, 0.0f, abs(sin(currentFrameTime)) * 0.5f);
+            // basic_shader.set_uniform("tint", glm::vec3(0.0f, 0.0f, abs(sin(currentFrameTime*2)) * 0.5f));
 
             glfwPollEvents();
 
-            glClearColor(.2f /* * abs(sin(glfwGetTime())) */, .2f, .25f, 1.0f);
+            glClearColor(.2f, .2f, .25f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
 
-            vao.bind();
             glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(uint32_t), GL_UNSIGNED_INT, 0);
-            vao.unbind();
 
             glfwSwapBuffers(window);
         }
