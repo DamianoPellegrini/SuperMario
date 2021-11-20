@@ -11,6 +11,12 @@ struct WNDPTR {
     const size_t vertex_size;
 };
 
+struct VertexLayout {
+    float x, y, z;
+    float r, g, b, a;
+    float s, t;
+};
+
 int main(int argc, char** argv, char** envp) {
 
     std::clog << "Starting..." << std::endl;
@@ -76,17 +82,6 @@ int main(int argc, char** argv, char** envp) {
         //     state2 = !state2;
         //     glPolygonMode(GL_FRONT_AND_BACK, state2 ? GL_LINE : GL_FILL);
         // }
-
-        if (WNDPTR* ptr = (WNDPTR*)glfwGetWindowUserPointer(wnds)) {
-
-            static bool state3 = false;
-
-            if (key == GLFW_KEY_N && action == GLFW_PRESS) {
-                state3 = !state3;
-                auto writes = state3 ? ptr->vertices2 : ptr->vertices;
-                ptr->vb.write(writes, ptr->vertex_size * sizeof(float));
-            }
-        }
         });
 
     glfwSetErrorCallback([](int error_code, const char* description) {
@@ -138,76 +133,49 @@ int main(int argc, char** argv, char** envp) {
     std::clog << glGetString(GL_VENDOR) << std::endl;
     std::clog << glGetString(GL_RENDERER) << std::endl;
 
-    float vertices[24] = {
-        // Top left
-        -0.75f, 0.75f, 0.0f,
-        1.0f, 1.0f, 0.0f,
-
-        // Top right
-        0.75f, 0.75f, 0.0f,
-        1.0f, 0.0f, 0.0f,
-
-        // Bottom right
-        0.75f, -0.75f, 0.0f,
-        0.0f, 1.0f, 0.0f,
-
-        // Bottom left
-        -0.75f, -0.75f, 0.0f,
-        0.0f, 0.0f, 1.0f,
+    VertexLayout vl[4] = {
+        {
+            .x = -0.75f, .y = 0.75f, .z = 0.0f,
+            .r = 1.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f,
+            .s = 0.0f, .t = 0.0f,
+        },
+        {
+            .x = 0.75f, .y = 0.75f, .z = 0.0f,
+            .r = 1.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f,
+            .s = 0.0f, .t = 0.0f,
+        },
+        {
+            .x = 0.75f, .y = -0.75f, .z = 0.0f,
+            .r = 0.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f,
+            .s = 0.0f, .t = 0.0f,
+        },
+        {
+            .x = -0.75f, .y = -0.75f, .z = 0.0f,
+            .r = 0.0f, .g = 0.0f, .b = 1.0f, .a = 1.0f,
+            .s = 0.0f, .t = 0.0f,
+        },
     };
-
-    float vertices2[24] = {
-        // Top left
-        -0.5f, 0.5f, 0.0f,
-        0.0f, 0.0f, 1.0f,
-
-        // Top right
-        0.5f, 0.5f, 0.0f,
-        0.0f, 1.0f, 0.0f,
-
-        // Bottom right
-        0.5f, -0.5f, 0.0f,
-        1.0f, 1.0f, 0.0f,
-
-        // Bottom left
-        -0.5f, -0.5f, 0.0f,
-        1.0f, 0.0f, 0.0f,
-    };
-
-    // float colors[12] = {
-    //     1.0f, 1.0f, 0.0f,
-    //     1.0f, 0.0f, 0.0f,
-    //     0.0f, 1.0f, 0.0f,
-    //     0.0f, 0.0f, 1.0f,
-    // };
 
     uint32_t indices[6] = {
         // Upper triangle
-        0,
-        1,
-        3,
+        0, 1, 3,
 
         // Lower triangle
-        1,
-        2,
-        3,
-
+        1, 2, 3,
     };
 
     {
         //* VAO Configuration
         engine::renderer::vertex_array vao{};
 
-        engine::renderer::vertex_buffer<float> vbo{ vertices, sizeof(vertices) / sizeof(float), GL_DYNAMIC_STORAGE_BIT | GL_MAP_WRITE_BIT | GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT };
+        engine::renderer::vertex_buffer<float> vbo{ (float*)&vl, sizeof(vl) / sizeof(float), GL_DYNAMIC_STORAGE_BIT | GL_MAP_WRITE_BIT | GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT };
         // vbo.bind();
-        vao.define_attribute(vbo, 0, 3, false, 6 * sizeof(float), 0);
+        vao.define_attribute(vbo, 0, 3, false, 9 * sizeof(float), 0);
         vao.enable_attribute(0);
-        vao.define_attribute(vbo, 1, 3, false, 6 * sizeof(float), 3 * sizeof(float));
+        vao.define_attribute(vbo, 1, 4, false, 9 * sizeof(float), 3 * sizeof(float));
         vao.enable_attribute(1);
-
-        // engine::renderer::vertex_buffer<float> colors_buffer{ colors, sizeof(colors) / sizeof(float), GL_STATIC_DRAW };
-        // vao.define_attribute(colors_buffer, 1, 3, false, 3 * sizeof(float), 0);
-        // vao.enable_attribute(1);
+        vao.define_attribute(vbo, 2, 2, false, 9 * sizeof(float), 4 * sizeof(float));
+        vao.enable_attribute(2);
 
         engine::renderer::index_buffer<uint32_t> ibo{ indices, sizeof(indices) / sizeof(uint32_t), GL_DYNAMIC_STORAGE_BIT };
         // ibo.bind(); // Same as below
@@ -215,9 +183,6 @@ int main(int argc, char** argv, char** envp) {
 
         vao.bind();
 
-        auto aa = WNDPTR{ .vb = vbo, .vertices = vertices, .vertices2 = vertices2, .vertex_size = 24 };
-
-        glfwSetWindowUserPointer(window, &aa);
 
         //* Shader Initialization
         engine::renderer::shader basic_shader{

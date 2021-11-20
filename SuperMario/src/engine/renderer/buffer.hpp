@@ -23,7 +23,8 @@ namespace engine::renderer {
 #if GL_ARB_direct_state_access
         glCreateBuffers(1, &buffer_id);
         glNamedBufferStorage(this->buffer_id, count * sizeof(T), data, usage);
-        this->gpu_memory_ptr = glMapNamedBuffer(this->buffer_id, GL_READ_WRITE);
+        if (usage & (GL_MAP_WRITE_BIT | GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT))
+            gpu_memory_ptr = glMapNamedBuffer(this->buffer_id, GL_READ_WRITE);
 #else
         glGenBuffers(1, &buffer_id);
         this->bind();
@@ -63,6 +64,6 @@ namespace engine::renderer {
 
     template<class T>
     using index_buffer = buffer<GL_ELEMENT_ARRAY_BUFFER, T>;
-} // namespace engine::renderer
+    } // namespace engine::renderer
 
 #endif
