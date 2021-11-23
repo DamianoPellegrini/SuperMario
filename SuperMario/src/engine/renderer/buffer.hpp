@@ -6,7 +6,7 @@ namespace engine::renderer {
     class buffer {
     protected:
         uint32_t buffer_id;
-        void* gpu_memory_ptr;
+        GLenum usage;
     public:
         buffer(const T* data, size_t count, GLenum usage = GL_STATIC_DRAW);
         virtual ~buffer();
@@ -19,12 +19,10 @@ namespace engine::renderer {
     };
 
     template<GLenum target, class T>
-    buffer<target, T>::buffer(const T* data, size_t count, GLenum usage) {
+    buffer<target, T>::buffer(const T* data, size_t count, GLenum usage) : usage(usage) {
 #if GL_ARB_direct_state_access
         glCreateBuffers(1, &buffer_id);
         glNamedBufferStorage(this->buffer_id, count * sizeof(T), data, usage);
-        if (usage & (GL_MAP_WRITE_BIT | GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT))
-            gpu_memory_ptr = glMapNamedBuffer(this->buffer_id, GL_READ_WRITE);
 #else
         glGenBuffers(1, &buffer_id);
         this->bind();
@@ -46,16 +44,24 @@ namespace engine::renderer {
 
     template<GLenum target, class T>
     void buffer<target, T>::write(const T* data, const size_t size) const {
-        if (!this->gpu_memory_ptr) return;
-        memcpy(this->gpu_memory_ptr, data, size);
+
+        if (!(usage & GL_DYNAMIC_STORAGE_BIT)) {
+            std::clog << "Buffer storage is not dynamic" << std::endl;
+        }
+
+        if (usage & (GL_MAP_WRITE_BIT | GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT)) {
+            const volatile T* gpu_memory_ptr = (const volatile T*)glMapNamedBuffer(this->buffer_id, GL_READ_WRITE);
+            memcpy((void*)gpu_memory_ptr, data, size);
+            glUnmapNamedBuffer(this->buffer_id);
+        }
+        else {
+            glNamedBufferSubData(this->buffer_id, 0, size, data);
+        }
+
     }
 
     template<GLenum target, class T>
     buffer<target, T>::~buffer() {
-        if (this->gpu_memory_ptr) {
-            glUnmapNamedBuffer(this->buffer_id);
-            this->gpu_memory_ptr = nullptr;
-        }
         glDeleteBuffers(1, &buffer_id);
     }
 
@@ -64,6 +70,6 @@ namespace engine::renderer {
 
     template<class T>
     using index_buffer = buffer<GL_ELEMENT_ARRAY_BUFFER, T>;
-    } // namespace engine::renderer
+} // namespace engine::renderer
 
 #endif
