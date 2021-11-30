@@ -33,8 +33,6 @@ workspace "SuperMario"
 
     -- Adding every dependency that need to be compiled
     group "Dependencies"
-        include "dependencies/glfw.lua"
-        include "dependencies/glad.lua"
 
     group ""
         include "SuperMario"

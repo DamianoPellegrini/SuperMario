@@ -11,7 +11,9 @@ project "SuperMario"
 
     files {"%{prj.location}/src/**.cpp", "%{prj.location}/src/**.hpp"}
 
-    includedirs {"%{prj.location}/src"}
+    includedirs {
+        "%{prj.location}/src"
+    }
 
     sysincludedirs {
         "%{wks.location}/dependencies/glfw/include",
