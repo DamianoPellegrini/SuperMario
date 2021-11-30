@@ -16,7 +16,6 @@ workspace "SuperMario"
 
     -- Adding every dependency that need to be compiled
     group "Dependencies"
-        include "dependencies/glad"
 
     group ""
         include "SuperMario"

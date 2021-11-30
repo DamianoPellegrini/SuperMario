@@ -21,9 +21,8 @@
 // #include <unordered_set>
 #include <vector>
 #include <iterator>
-// #include <initializer_list>
+#include <initializer_list>
 // #include <tuple>
-// #include <span>
 
 // === STL Atomics and threading ===
 // #include <atomic>
@@ -35,6 +34,7 @@
 // === STL Memory ===
 #include <new>
 #include <memory>
+#include <span>
 
 #include <string>
 #include <string_view>

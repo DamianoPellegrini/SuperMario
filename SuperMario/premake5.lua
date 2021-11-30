@@ -15,8 +15,7 @@ project "SuperMario"
     }
 
     includedirs {
-        "%{prj.location}/src",
-        "%{wks.location}/dependencies/glad/include"
+        "%{prj.location}/src"
     }
 
     links {
