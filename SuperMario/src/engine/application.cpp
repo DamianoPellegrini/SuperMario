@@ -31,7 +31,11 @@ namespace engine {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-        glfwWindowHint(GLFW_FOCUSED, DEBUG ? GLFW_FALSE : GLFW_TRUE);
+#ifdef DEBUG
+        glfwWindowHint(GLFW_FOCUSED, GLFW_FALSE);
+#else
+        glfwWindowHint(GLFW_FOCUSED, GLFW_TRUE);
+#endif
         // glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
         // glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
         this->_window = glfwCreateWindow(this->_width, this->_height, this->_title.c_str(), nullptr, nullptr);
