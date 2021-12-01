@@ -1,8 +1,22 @@
 #include "pch.hpp"
+#include "engine/application.hpp"
 
-int main(int argc, char* argv[])
-{
-    std::cout << "Hello, World!" << std::endl;
+int main() {
+    engine::application* app = new engine::application{
+        "Super Mario",
+        1280,
+        720
+    };
 
-    return 0;
+    try {
+        app->run();
+    }
+    catch (const std::exception& e) {
+        std::cerr << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    delete app;
+
+    return EXIT_SUCCESS;
 }
