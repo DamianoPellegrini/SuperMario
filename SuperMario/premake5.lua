@@ -18,13 +18,15 @@ includedirs {
     "%{wks.location}/dependencies/glm"
 }
 
-buildoptions {"-Wvolatile"}
 links {"glfw", "spdlog"}
 
 filter "system:windows"
-links {"vulkan"}
+includedirs {os.getenv("VULKAN_SDK") .. "/Include"}
+libdirs {os.getenv("VULKAN_SDK") .. "/Lib"}
+links {"vulkan-1"}
 
 filter "system:linux"
+buildoptions {"-Wvolatile"}
 links {"vulkan", "dl", "pthread", "X11", "Xrandr", "Xxf86vm", "Xi"}
 
 -- Cross platform dependencies
