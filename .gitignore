@@ -42,6 +42,10 @@ obj/
 
 # Local History for Visual Studio Code
 .history/
+*.vcxproj*
+*.sln
+
+.vs/
 
 CMakeLists.txt.user
 CMakeCache.txt

@@ -1,8 +1,8 @@
 workspace "SuperMario"
 configurations {"Debug", "Profile", "Release"}
 vectorextensions "SSE2"
-flags {"MultiProcessorCompile", "LinkTimeOptimization"}
--- architecture "x86_64"
+architecture "x86_64"
+flags {"MultiProcessorCompile"}
 
 filter "configurations:Debug"
 defines {"DEBUG"}
@@ -19,6 +19,7 @@ system "windows"
 
 filter "system:linux"
 system "linux"
+flags {"LinkTimeOptimization"}
 
 filter "system:macosx"
 system "macosx"

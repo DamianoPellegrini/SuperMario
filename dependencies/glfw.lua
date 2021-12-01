@@ -12,7 +12,9 @@ files {
     "%{prj.location}/src/mappings.h", "%{prj.location}/src/monitor.c",
     "%{prj.location}/src/vulkan.c", "%{prj.location}/src/window.c",
     "%{prj.location}/src/xkb_unicode.c", "%{prj.location}/src/xkb_unicode.h",
-    "%{prj.location}/include/**.h"
+    "%{prj.location}/src/egl_context.c", "%{prj.location}/src/egl_context.h",
+    "%{prj.location}/src/osmesa_context.c",
+    "%{prj.location}/src/osmesa_context.h", "%{prj.location}/include/**.h"
 }
 
 includedirs {"%{prj.location}/include"}
@@ -30,7 +32,9 @@ files {
     "%{prj.location}/src/win32_thread.c", "%{prj.location}/src/win32_time.c",
     "%{prj.location}/src/win32_window.c"
 }
-defines {"_GLFW_WIN32"}
+includedirs {os.getenv("VULKAN_SDK") .. "/Include"}
+libdirs {os.getenv("VULKAN_SDK") .. "/Lib"}
+defines {"_GLFW_WIN32", "_CRT_SECURE_NO_WARNINGS"}
 
 filter "system:linux"
 files {
@@ -40,10 +44,6 @@ files {
     "%{prj.location}/src/posix_thread.c", "%{prj.location}/src/posix_thread.h",
     "%{prj.location}/src/posix_time.c", "%{prj.location}/src/posix_time.h",
     -- _GLFW_OSMESA
-    "%{prj.location}/src/egl_context.c",
-    "%{prj.location}/src/egl_context.h",
-    "%{prj.location}/src/osmesa_context.c",
-    "%{prj.location}/src/osmesa_context.h",
     -- "%{prj.location}/src/null_init.c",
     -- "%{prj.location}/src/null_monitor.c",
     -- "%{prj.location}/src/null_platform.h",
