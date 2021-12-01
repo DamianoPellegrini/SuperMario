@@ -1,6 +1,6 @@
 # SuperMario
 
-SuperMario clone written in C++20 using OpenGL 4.6 targetting mainly Linux-based operating systems.
+SuperMario clone written in C++20 using Vulkan 1.2.
 
 ## Build instructions
 
@@ -11,17 +11,16 @@ SuperMario clone written in C++20 using OpenGL 4.6 targetting mainly Linux-based
 
 ### Dependencies
 
-- opengl `4.6` + glad for loading
-- glfw `^3.3.4`
-- simdjson `^1.0.2`
-- glm `^0.9.9.8`
+- vulkan `1.2`
+- xorg
+- spirv tools
 
 #### Linux
 
 On Debian based systems, install the dependencies by using the following command:
 
 ```shell
-apt install libglfw3-dev libsimdjson-dev libglm-dev
+apt install xorg-dev vulkan-tools libvulkan-dev spirv-tools
 ```
 
 ### Configure project

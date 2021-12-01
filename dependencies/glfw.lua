@@ -17,7 +17,7 @@ files {
 
 includedirs {"%{prj.location}/include"}
 
-defines {"_GLFW_VULKAN_STATIC"}
+-- defines {"_GLFW_VULKAN_STATIC"}
 
 -- platform specific
 filter "system:windows"
@@ -40,8 +40,10 @@ files {
     "%{prj.location}/src/posix_thread.c", "%{prj.location}/src/posix_thread.h",
     "%{prj.location}/src/posix_time.c", "%{prj.location}/src/posix_time.h",
     -- _GLFW_OSMESA
-    -- "%{prj.location}/src/osmesa_context.c",
-    -- "%{prj.location}/src/osmesa_context.h",
+    "%{prj.location}/src/egl_context.c",
+    "%{prj.location}/src/egl_context.h",
+    "%{prj.location}/src/osmesa_context.c",
+    "%{prj.location}/src/osmesa_context.h",
     -- "%{prj.location}/src/null_init.c",
     -- "%{prj.location}/src/null_monitor.c",
     -- "%{prj.location}/src/null_platform.h",
@@ -72,3 +74,5 @@ files {
     "%{prj.location}/src/cocoa_window.c"
 }
 defines {"_GLFW_COCOA"}
+
+filter {}

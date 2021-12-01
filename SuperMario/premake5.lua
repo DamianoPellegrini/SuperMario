@@ -19,6 +19,7 @@ includedirs {
 }
 
 buildoptions {"-Wvolatile"}
+links {"glfw", "spdlog"}
 
 filter "system:windows"
 links {"vulkan"}
@@ -28,4 +29,3 @@ links {"vulkan", "dl", "pthread", "X11", "Xrandr", "Xxf86vm", "Xi"}
 
 -- Cross platform dependencies
 filter {}
-links {"glfw", "spdlog"}
