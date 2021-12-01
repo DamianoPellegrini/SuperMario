@@ -1,3 +1,15 @@
 [submodule "dependencies/simdjson"]
 	path = dependencies/simdjson
 	url = https://github.com/simdjson/simdjson
+[submodule "dependencies/glfw"]
+	path = dependencies/glfw
+	url = git@github.com:glfw/glfw
+[submodule "dependencies/spdlog"]
+	path = dependencies/spdlog
+	url = git@github.com:gabime/spdlog
+[submodule "dependencies/glm"]
+	path = dependencies/glm
+	url = git@github.com:g-truc/glm
+[submodule "dependencies/json"]
+	path = dependencies/json
+	url = git@github.com:nlohmann/json

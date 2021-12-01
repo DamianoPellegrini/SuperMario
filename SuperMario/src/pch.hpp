@@ -53,10 +53,11 @@
 // #include <system_error>
 
 // === THIRD PARTY ===
-#include <glad/gl.h>
+#include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
-// #include <cxxopts.hpp>
-#include <simdjson.h>
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
+#include <spdlog/spdlog.h>
 
 #endif

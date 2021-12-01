@@ -1,28 +1,31 @@
 project "SuperMario"
-    kind "ConsoleApp"
-    language "C++"
-    cppdialect "C++20"
-    
-    pchheader "pch.hpp"
-    pchsource "%{prj.location}/src/pch.cpp"
+kind "ConsoleApp"
+language "C++"
+cppdialect "C++20"
 
-    targetdir "%{wks.location}/bin/%{cfg.buildcfg}"
-    objdir "%{wks.location}/obj/%{cfg.buildcfg}"
+pchheader "pch.hpp"
+pchsource "%{prj.location}/src/pch.cpp"
 
-    files {
-        "%{prj.location}/src/**.cpp",
-        "%{prj.location}/src/**.hpp"
-    }
+targetdir "%{wks.location}/bin/%{cfg.buildcfg}"
+objdir "%{wks.location}/obj/%{cfg.buildcfg}"
 
-    includedirs {
-        "%{prj.location}/src"
-    }
+files {"%{prj.location}/src/**.cpp", "%{prj.location}/src/**.hpp"}
 
-    links {
-        "GL",
-        "glfw",
-        "glad",
-        "simdjson",
-        "dl",
-        "pthread",
-    }
+includedirs {
+    "%{prj.location}/src", "%{wks.location}/dependencies/glfw/include",
+    "%{wks.location}/dependencies/spdlog/include",
+    "%{wks.location}/dependencies/json/include",
+    "%{wks.location}/dependencies/glm"
+}
+
+buildoptions {"-Wvolatile"}
+
+filter "system:windows"
+links {"vulkan"}
+
+filter "system:linux"
+links {"vulkan", "dl", "pthread", "X11", "Xrandr", "Xxf86vm", "Xi"}
+
+-- Cross platform dependencies
+filter {}
+links {"glfw", "spdlog"}
