@@ -3,14 +3,20 @@
 
 namespace engine {
 
-    application::application(std::string title, uint32_t width, uint32_t height)
+    application::application(const std::string& title, uint32_t width, uint32_t height)
         : _title(title), _width(width), _height(height) {
         initGLFW();
-        initVulkan();
+
+        auto fut = std::async(std::launch::async, [](const std::string& title) {
+            return new vulkan_manager(title);
+            }, title);
+
+        this->_vulkan_manager = fut.get();
+
     }
 
     application::~application() {
-        cleanupVulkan();
+        delete _vulkan_manager;
         cleanupGLFW();
     }
 
@@ -44,43 +50,6 @@ namespace engine {
     void application::cleanupGLFW() {
         glfwDestroyWindow(this->_window);
         glfwTerminate();
-    }
-
-    void application::initVulkan() {
-        VkApplicationInfo appInfo{
-            .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
-            .pApplicationName = this->_title.c_str(),
-            .applicationVersion = VK_MAKE_VERSION(1, 0, 0),
-            .pEngineName = "No Engine",
-            .engineVersion = VK_MAKE_VERSION(1, 0, 0),
-            .apiVersion = VK_API_VERSION_1_2
-        };
-
-        uint32_t extensionCount = 0;
-        const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&extensionCount);
-
-        VkInstanceCreateInfo createInfo{
-            .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-            .pApplicationInfo = &appInfo,
-            .enabledExtensionCount = extensionCount,
-            .ppEnabledExtensionNames = glfwExtensions,
-        };
-
-        if (vkCreateInstance(&createInfo, nullptr, &this->_instance) != VkResult::VK_SUCCESS)
-            throw std::runtime_error("Failed to create Vulkan instance!");
-
-        // Get extension count
-        vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
-
-        this->_extensions = std::vector<VkExtensionProperties>{ extensionCount };
-
-        // Get extension information
-        if (vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, this->_extensions.data()) != VkResult::VK_SUCCESS)
-            throw std::runtime_error("Failed to enumerate Vulkan instance extensions!");
-    }
-
-    void application::cleanupVulkan() {
-        vkDestroyInstance(this->_instance, nullptr);
     }
 
 } // namespace engine
