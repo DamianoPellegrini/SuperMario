@@ -1,6 +1,8 @@
 #ifndef _APPLICATION_HPP_
 #define _APPLICATION_HPP_
 
+#include "vulkan_manager.hpp"
+
 namespace engine {
 
     class application {
@@ -13,22 +15,19 @@ namespace engine {
         // GLFW
         GLFWwindow* _window;
 
-        // Vulkan
-        VkInstance _instance;
-        std::vector<VkExtensionProperties> _extensions;
+        const vulkan_manager* _vulkan_manager;
+
     public:
-        application(std::string title, uint32_t window_width, uint32_t window_height);
+        application(const std::string& title, uint32_t window_width, uint32_t window_height);
         ~application();
 
         void run();
     private:
         void initGLFW();
-        void initVulkan();
 
         void mainLoop();
 
         void cleanupGLFW();
-        void cleanupVulkan();
     };
 
 } // namespace engine
