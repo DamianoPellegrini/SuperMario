@@ -6,6 +6,7 @@ namespace engine {
     public:
         manager() = default;
         virtual ~manager() = default;
+        virtual void run() = 0;
     };
 } // namespace engine
 
