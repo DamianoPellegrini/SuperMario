@@ -27,6 +27,7 @@ namespace engine {
     public:
         vulkan_manager(const std::string& application_name);
         virtual ~vulkan_manager() override;
+        virtual void run() override;
     private:
         bool checkValidationLayerSupport();
         std::vector<const char*> getRequiredExtensions();

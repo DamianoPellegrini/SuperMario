@@ -140,4 +140,6 @@ namespace engine {
         return VK_FALSE;
     }
 
+    void vulkan_manager::run() {}
+
 } // namespace engine
