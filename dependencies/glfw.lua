@@ -66,12 +66,12 @@ defines {"_GLFW_X11"}
 
 filter "system:macosx"
 files {
-    "%{prj.location}/src/nsgl_context.c", "%{prj.location}/src/nsgl_context.h",
+    "%{prj.location}/src/nsgl_context.m", "%{prj.location}/src/nsgl_context.h",
     "%{prj.location}/src/cocoa_init.m", "%{prj.location}/src/cocoa_joystick.m",
     "%{prj.location}/src/cocoa_joystick.h",
     "%{prj.location}/src/cocoa_monitor.m",
     "%{prj.location}/src/cocoa_platform.h", "%{prj.location}/src/cocoa_time.c",
-    "%{prj.location}/src/cocoa_window.c"
+    "%{prj.location}/src/cocoa_window.m"
 }
 defines {"_GLFW_COCOA"}
 
