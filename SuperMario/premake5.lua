@@ -29,5 +29,9 @@ filter "system:linux"
 buildoptions {"-Wvolatile"}
 links {"vulkan", "dl", "pthread", "X11", "Xrandr", "Xxf86vm", "Xi"}
 
+filter "system:macosx"
+links {"Cocoa.framework", "IOKit.framework", "CoreVideo.framework", "vulkan"}
+buildoptions {"-Wdeprecated-volatile", "-Wdeprecated-declarations"}
+
 -- Cross platform dependencies
 filter {}
