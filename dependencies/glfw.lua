@@ -14,7 +14,7 @@ files {
     "%{prj.location}/include/**.h", "%{prj.location}/src/glfw_config.h",
 }
 
-includedirs {"%{prj.location}/include"}
+sysincludedirs {"%{prj.location}/include"}
 
 -- defines {"_GLFW_VULKAN_STATIC"}
 
@@ -31,7 +31,7 @@ files {
     "%{prj.location}/src/win32_thread.c", "%{prj.location}/src/win32_time.c",
     "%{prj.location}/src/win32_window.c"
 }
-includedirs {os.getenv("VULKAN_SDK") .. "/Include"}
+sysincludedirs {os.getenv("VULKAN_SDK") .. "/Include"}
 libdirs {os.getenv("VULKAN_SDK") .. "/Lib"}
 defines {"_GLFW_WIN32", "_CRT_SECURE_NO_WARNINGS"}
 links {"vulkan-1"}
