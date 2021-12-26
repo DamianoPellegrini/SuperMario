@@ -30,10 +30,7 @@ buildoptions {"-Wvolatile"}
 links {"vulkan", "dl", "pthread", "X11", "Xrandr", "Xxf86vm", "Xi"}
 
 filter "system:macosx"
-sysincludedirs {os.getenv("VULKAN_SDK") .. "/macOS/include"}
-libdirs {os.getenv("VULKAN_SDK") .. "/macOS/lib"}
-frameworkdirs {os.getenv("VULKAN_SDK") .. "/macOS/Frameworks"}
-links {"Cocoa.framework", "IOKit.framework", "CoreVideo.framework", "vulkan.framework"}
+links {"Cocoa.framework", "IOKit.framework", "CoreVideo.framework", "vulkan"}
 buildoptions {"-Wdeprecated-volatile", "-Wdeprecated-declarations"}
 
 -- Cross platform dependencies
