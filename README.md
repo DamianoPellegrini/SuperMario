@@ -1,34 +1,46 @@
-# SuperMario
+# **SuperMario**
 
-SuperMario clone written in C++20 using Vulkan 1.2.
+SuperMario clone written in C++20 using Vulkan.
 
-## Build instructions
-
-### Requirements
-
-- premake5
-- gmake
+## **Build instructions**
 
 ### Dependencies
 
-- vulkan `1.2`
-- xorg
+- premake5
+- VulkanSDK
 - spirv tools
+- xorg (on-linux)
+- MoltenVK (on-macos)
 
-#### Linux
+#### *MacOS*
 
-On Debian based systems, install the dependencies by using the following command:
+Install Xcode from the AppStore.
+Install the **[VulkanSDK](https://vulkan.lunarg.com/sdk/home)**.
+Install the remaning dependencies using **[homebrew](https://brew.sh/)**:
 
 ```shell
-apt install xorg-dev vulkan-tools libvulkan-dev spirv-tools
+brew install --head premake \
+&& brew install CocoaPods
 ```
 
-### Configure project
+#### *Linux*
+
+On Debian based systems, install the dependencies by using the following command(you will need to prefix with sudo in most cases):
+
+```shell
+apt install \
+    xorg-dev \
+    vulkan-tools \
+    libvulkan-dev \
+    spirv-tools
+```
+
+### **Configure & Run**
 
 Run these command to get up and running
 
 ```shell
-premake5 gmake
+premake5 gmake2
 make clean
 make config=release all
 (cd ./run && exec ../bin/Release/SuperMario)
