@@ -11,9 +11,7 @@ objdir "%{wks.location}/obj/%{cfg.buildcfg}"
 
 files {"%{prj.location}/src/**.cpp", "%{prj.location}/src/**.hpp"}
 
-includedirs {
-    "%{prj.location}/src",
-}
+includedirs {"%{prj.location}/src"}
 
 sysincludedirs {
     "%{wks.location}/dependencies/glfw/include",
@@ -25,17 +23,30 @@ sysincludedirs {
 links {"glfw"}
 
 filter "system:windows"
+filename "%{prj.name}.exe"
 sysincludedirs {os.getenv("VULKAN_SDK") .. "/Include"}
 libdirs {os.getenv("VULKAN_SDK") .. "/Lib"}
 links {"vulkan-1"}
 
 filter "system:linux"
+filename "%{prj.name}"
 buildoptions {"-Wvolatile"}
 links {"vulkan", "dl", "pthread", "X11", "Xrandr", "Xxf86vm", "Xi"}
 
 filter "system:macosx"
-links {"Cocoa.framework", "IOKit.framework", "CoreVideo.framework", "vulkan"}
+filename "%{prj.name}.app"
+sysincludedirs {
+    os.getenv("VULKAN_SDK") .. "/macOS/include"
+}
+libdirs {os.getenv("VULKAN_SDK") .. "/macOS/lib"}
+links {
+    "Cocoa.framework", "IOKit.framework", "CoreVideo.framework",
+    "vulkan"
+}
 buildoptions {"-Wdeprecated-volatile", "-Wdeprecated-declarations"}
 
 -- Cross platform dependencies
 filter {}
+postbuildcommands {
+    "{COPY} %{wks.location}/run/** %{cfg.targetdir}"
+}
