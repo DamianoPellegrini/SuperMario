@@ -11,7 +11,7 @@ objdir "%{wks.location}/obj/%{cfg.buildcfg}"
 
 files {"%{prj.location}/src/**.cpp", "%{prj.location}/src/**.hpp"}
 
-includedirs {
+sysincludedirs {
     "%{prj.location}/src", "%{wks.location}/dependencies/glfw/include",
     "%{wks.location}/dependencies/spdlog/include",
     "%{wks.location}/dependencies/json/include",
@@ -21,13 +21,17 @@ includedirs {
 links {"glfw"}
 
 filter "system:windows"
-includedirs {os.getenv("VULKAN_SDK") .. "/Include"}
+sysincludedirs {os.getenv("VULKAN_SDK") .. "/Include"}
 libdirs {os.getenv("VULKAN_SDK") .. "/Lib"}
 links {"vulkan-1"}
 
 filter "system:linux"
 buildoptions {"-Wvolatile"}
 links {"vulkan", "dl", "pthread", "X11", "Xrandr", "Xxf86vm", "Xi"}
+
+filter "system:macosx"
+links {"Cocoa.framework", "IOKit.framework", "CoreVideo.framework", "vulkan"}
+buildoptions {"-Wdeprecated-volatile", "-Wdeprecated-declarations"}
 
 -- Cross platform dependencies
 filter {}
