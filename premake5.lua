@@ -30,7 +30,6 @@ filter {}
 -- Adding every dependency that need to be compiled
 group "Dependencies"
 include "dependencies/glfw.lua"
-include "dependencies/spdlog.lua"
 
 group ""
 include "SuperMario"

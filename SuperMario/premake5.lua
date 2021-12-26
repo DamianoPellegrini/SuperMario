@@ -18,7 +18,7 @@ includedirs {
     "%{wks.location}/dependencies/glm"
 }
 
-links {"glfw", "spdlog"}
+links {"glfw"}
 
 filter "system:windows"
 includedirs {os.getenv("VULKAN_SDK") .. "/Include"}
