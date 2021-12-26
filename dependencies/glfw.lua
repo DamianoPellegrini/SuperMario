@@ -14,7 +14,7 @@ files {
     "%{prj.location}/include/**.h", "%{prj.location}/src/glfw_config.h",
 }
 
-sysincludedirs {"%{prj.location}/include"}
+includedirs {"%{prj.location}/include"}
 
 -- defines {"_GLFW_VULKAN_STATIC"}
 
