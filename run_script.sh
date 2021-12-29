@@ -1,1 +1,1 @@
-(cd ./run && ../bin/Debug/SuperMario)
+(cd ./bin/Debug && ./SuperMario.app)

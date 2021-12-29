@@ -23,10 +23,10 @@ namespace engine {
         : _application_name(application_name) {
         this->createInstance();
         this->setupDebugCallback();
+        this->pickPhysicalDevice();
     }
 
     vulkan_manager::~vulkan_manager() {
-
         if (this->_enableDebugMode) {
             DestroyDebugUtilsMessengerEXT(this->_instance, this->_debugMessenger, nullptr);
         }
@@ -113,6 +113,69 @@ namespace engine {
         return extensions;
     }
 
+    void vulkan_manager::pickPhysicalDevice() {
+        uint32_t deviceCount = 0;
+        vkEnumeratePhysicalDevices(this->_instance, &deviceCount, nullptr);
+        if (deviceCount == 0)
+            throw std::runtime_error("Failed to find GPUs with Vulkan support!");
+
+        std::vector<VkPhysicalDevice> devices(deviceCount);
+        vkEnumeratePhysicalDevices(this->_instance, &deviceCount, devices.data());
+
+        for (const auto& device : devices) {
+            if (this->isDeviceSuitable(device)) {
+                this->_physicalDevice = device;
+                break;
+            }
+        }
+
+        if (this->_physicalDevice == VK_NULL_HANDLE)
+            throw std::runtime_error("Failed to find a suitable GPU!");
+
+
+    }
+
+    bool vulkan_manager::isDeviceSuitable(VkPhysicalDevice device) {
+        VkPhysicalDeviceProperties deviceProperties;
+        vkGetPhysicalDeviceProperties(device, &deviceProperties);
+
+        VkPhysicalDeviceFeatures deviceFeatures;
+        vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+
+        const char* deviceType = nullptr;
+        switch (deviceProperties.deviceType) {
+        case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
+            deviceType = "Integrated GPU";
+            break;
+        case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
+            deviceType = "Discrete GPU";
+            break;
+        case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:
+            deviceType = "Virtual GPU";
+            break;
+        case VK_PHYSICAL_DEVICE_TYPE_CPU:
+            deviceType = "CPU";
+            break;
+        default:
+            deviceType = "Unknown";
+            break;
+        }
+
+        spdlog::info(
+            "[Physical Device] [{}, driver: {}] {}",
+            deviceType,
+            deviceProperties.driverVersion,
+            deviceProperties.deviceName
+        );
+
+
+        return true;
+
+        // Implement GPU scoring
+        return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU
+            && deviceFeatures.geometryShader;
+    }
+
     void vulkan_manager::setupDebugCallback() {
         if (!this->_enableDebugMode) return;
 
@@ -134,10 +197,41 @@ namespace engine {
         VkDebugUtilsMessageTypeFlagsEXT messageType,
         const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
         void* pUserData) {
-        if (messageSeverity < VkDebugUtilsMessageSeverityFlagBitsEXT::VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT) return VK_FALSE;
-        std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
+        const char* type = nullptr;
 
-        return VK_FALSE;
+        switch (messageType) {
+        case VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT:
+            type = "GENERAL";
+            break;
+        case VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT:
+            type = "VALIDATION";
+            break;
+        case VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT:
+            type = "PERFORMANCE";
+            break;
+            default:
+            type = "UNKNOWN";
+            break;
+        }
+
+        switch (messageSeverity) {
+            case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
+                spdlog::trace("[VK_DEBUG] [{}] {}", type, pCallbackData->pMessage);
+                break;
+            case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
+                spdlog::info("[VK_DEBUG] [{}] {}", type, pCallbackData->pMessage);
+                break;
+            case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
+                spdlog::warn("[VK_DEBUG] [{}] {}", type, pCallbackData->pMessage);
+                break;
+            case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
+                spdlog::error("[VK_DEBUG] [{}] {}", type, pCallbackData->pMessage);
+                break;
+            default:
+                spdlog::critical("[VK_DEBUG] [{}] {}", type, pCallbackData->pMessage);
+        }
+
+        return VK_FALSE; // continue propagating
     }
 
     void vulkan_manager::run() {}

@@ -23,22 +23,18 @@ sysincludedirs {
 links {"glfw"}
 
 filter "system:windows"
-filename "%{prj.name}.exe"
+        targetname "%{prj.name}.exe"
 sysincludedirs {os.getenv("VULKAN_SDK") .. "/Include"}
 libdirs {os.getenv("VULKAN_SDK") .. "/Lib"}
 links {"vulkan-1"}
 
 filter "system:linux"
-filename "%{prj.name}"
+        targetname "%{prj.name}"
 buildoptions {"-Wvolatile"}
 links {"vulkan", "dl", "pthread", "X11", "Xrandr", "Xxf86vm", "Xi"}
 
 filter "system:macosx"
-filename "%{prj.name}.app"
-sysincludedirs {
-    os.getenv("VULKAN_SDK") .. "/macOS/include"
-}
-libdirs {os.getenv("VULKAN_SDK") .. "/macOS/lib"}
+        targetname "%{prj.name}.app"
 links {
     "Cocoa.framework", "IOKit.framework", "CoreVideo.framework",
     "vulkan"

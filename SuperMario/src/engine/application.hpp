@@ -8,15 +8,19 @@ namespace engine {
 
     class application {
     private:
+
+        std::shared_ptr<spdlog::logger> _logger = nullptr;
+
         bool _running;
 
-        vulkan_manager* _vulkan_manager;
-        glfw_manager* _glfw_manager;
+        std::unique_ptr<vulkan_manager> _vulkan_manager = nullptr;
+        std::unique_ptr<glfw_manager> _glfw_manager = nullptr;
     public:
         application(const std::string& title, const uint32_t window_width, const uint32_t window_height);
         ~application();
 
         void run();
+        void init_logger(const std::string& title);
     private:
     };
 
