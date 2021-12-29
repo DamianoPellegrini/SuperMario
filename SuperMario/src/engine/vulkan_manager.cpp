@@ -113,6 +113,64 @@ namespace engine {
         return extensions;
     }
 
+    void vulkan_manager::setupDebugCallback() {
+        if (!this->_enableDebugMode) return;
+
+        VkDebugUtilsMessengerCreateInfoEXT createInfo{
+            .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
+            .messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
+            .messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
+            .pfnUserCallback = vulkan_manager::debugCallback,
+            .pUserData = nullptr,
+        };
+
+        if (CreateDebugUtilsMessengerEXT(this->_instance, &createInfo, nullptr, &this->_debugMessenger) != VkResult::VK_SUCCESS) {
+            throw std::runtime_error("failed to set up debug callback!");
+        }
+    }
+
+    VkBool32 VKAPI_CALL vulkan_manager::debugCallback(
+        VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+        VkDebugUtilsMessageTypeFlagsEXT messageType,
+        const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+        void* pUserData) {
+        const char* type = nullptr;
+
+        switch (messageType) {
+        case VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT:
+            type = "GENERAL";
+            break;
+        case VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT:
+            type = "VALIDATION";
+            break;
+        case VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT:
+            type = "PERFORMANCE";
+            break;
+        default:
+            type = "UNKNOWN";
+            break;
+        }
+
+        switch (messageSeverity) {
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
+            spdlog::trace("[VK_DEBUG] [{}] {}", type, pCallbackData->pMessage);
+            break;
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
+            spdlog::info("[VK_DEBUG] [{}] {}", type, pCallbackData->pMessage);
+            break;
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
+            spdlog::warn("[VK_DEBUG] [{}] {}", type, pCallbackData->pMessage);
+            break;
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
+            spdlog::error("[VK_DEBUG] [{}] {}", type, pCallbackData->pMessage);
+            break;
+        default:
+            spdlog::critical("[VK_DEBUG] [{}] {}", type, pCallbackData->pMessage);
+        }
+
+        return VK_FALSE; // continue propagating
+    }
+
     void vulkan_manager::pickPhysicalDevice() {
         uint32_t deviceCount = 0;
         vkEnumeratePhysicalDevices(this->_instance, &deviceCount, nullptr);
@@ -171,70 +229,47 @@ namespace engine {
             VK_VERSION_PATCH(deviceProperties.apiVersion)
         );
 
+        QueueFamilyIndices indices = this->findQueueFamilies(device);
 
-        return true;
+        return indices.isComplete();
 
         // Implement GPU scoring
         return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU
             && deviceFeatures.geometryShader;
     }
 
-    void vulkan_manager::setupDebugCallback() {
-        if (!this->_enableDebugMode) return;
+    QueueFamilyIndices vulkan_manager::findQueueFamilies(VkPhysicalDevice device) {
+        QueueFamilyIndices indices;
 
-        VkDebugUtilsMessengerCreateInfoEXT createInfo{
-            .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
-            .messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
-            .messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
-            .pfnUserCallback = vulkan_manager::debugCallback,
-            .pUserData = nullptr,
-        };
+        uint32_t queueFamilyCount = 0;
+        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
 
-        if (CreateDebugUtilsMessengerEXT(this->_instance, &createInfo, nullptr, &this->_debugMessenger) != VkResult::VK_SUCCESS) {
-            throw std::runtime_error("failed to set up debug callback!");
-        }
-    }
+        std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
 
-    VkBool32 VKAPI_CALL vulkan_manager::debugCallback(
-        VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-        VkDebugUtilsMessageTypeFlagsEXT messageType,
-        const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-        void* pUserData) {
-        const char* type = nullptr;
+        uint32_t i = 0;
+        for (const auto& queueFamily : queueFamilies) {
+            if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+                indices.graphicsFamily = i;
+                break;
+            }
 
-        switch (messageType) {
-        case VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT:
-            type = "GENERAL";
-            break;
-        case VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT:
-            type = "VALIDATION";
-            break;
-        case VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT:
-            type = "PERFORMANCE";
-            break;
-            default:
-            type = "UNKNOWN";
-            break;
+            // VkBool32 presentSupport = false;
+            // vkGetPhysicalDeviceSurfaceSupportKHR(device, i, this->_surface, &presentSupport);
+
+            // if (queueFamily.queueCount > 0 && presentSupport) {
+            //     indices.presentFamily = i;
+            // }
+
+            // ! Needed only when i check surface support
+            // if (indices.isComplete()) {
+            //     break;
+            // }
+
+            i++;
         }
 
-        switch (messageSeverity) {
-            case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
-                spdlog::trace("[VK_DEBUG] [{}] {}", type, pCallbackData->pMessage);
-                break;
-            case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
-                spdlog::info("[VK_DEBUG] [{}] {}", type, pCallbackData->pMessage);
-                break;
-            case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
-                spdlog::warn("[VK_DEBUG] [{}] {}", type, pCallbackData->pMessage);
-                break;
-            case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
-                spdlog::error("[VK_DEBUG] [{}] {}", type, pCallbackData->pMessage);
-                break;
-            default:
-                spdlog::critical("[VK_DEBUG] [{}] {}", type, pCallbackData->pMessage);
-        }
-
-        return VK_FALSE; // continue propagating
+        return indices;
     }
 
     void vulkan_manager::run() {}
