@@ -18,6 +18,8 @@ namespace engine {
 
         VkDebugUtilsMessengerEXT _debugMessenger;
 
+        VkPhysicalDevice _physicalDevice;
+
 #ifdef NDEBUG
         const bool _enableDebugMode = false;
 #else
@@ -34,6 +36,8 @@ namespace engine {
         bool checkExtensionSupport(const std::vector<const char*>& extensions);
         void createInstance();
         void setupDebugCallback();
+        void pickPhysicalDevice();
+        bool isDeviceSuitable(VkPhysicalDevice device);
 
         static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
             VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,

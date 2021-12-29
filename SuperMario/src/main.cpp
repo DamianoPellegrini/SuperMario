@@ -3,21 +3,25 @@
 
 int32_t main(int32_t argc, const char* argv[]) {
     int32_t exitCondition = EXIT_SUCCESS;
-    engine::application* app = new engine::application{
-        "Super Mario",
-        1280,
-        720
-    };
+
+    engine::application* app = nullptr;
 
     try {
+        app = new engine::application{
+            "Super Mario",
+            1280,
+            720
+        };
         app->run();
     }
     catch (const std::exception& e) {
-        std::cerr << e.what() << std::endl;
+        spdlog::critical("{0}", e.what());
         exitCondition = EXIT_FAILURE;
     }
 
     delete app;
+
+    spdlog::shutdown();
 
     return exitCondition;
 }

@@ -14,7 +14,7 @@ namespace engine {
 
     public:
         glfw_manager();
-        glfw_manager(const std::string& title, const uint32_t width, const uint32_t height);
+        glfw_manager(std::string title, const uint32_t width, const uint32_t height);
         virtual ~glfw_manager() override;
 
         virtual void run() override;
