@@ -2,6 +2,7 @@
 #define _VULKAN_MANAGER_HPP_
 
 #include "manager.hpp"
+#include "queue_family_indices.hpp"
 
 namespace engine {
     class vulkan_manager : public manager {
@@ -38,6 +39,7 @@ namespace engine {
         void setupDebugCallback();
         void pickPhysicalDevice();
         bool isDeviceSuitable(VkPhysicalDevice device);
+        QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 
         static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
             VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
