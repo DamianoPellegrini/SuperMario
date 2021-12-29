@@ -162,10 +162,13 @@ namespace engine {
         }
 
         spdlog::info(
-            "[Physical Device] [{}, driver: {}] {}",
+            "[Physical Device] [{}] {} (driver: {}) (api: {}.{}.{})",
             deviceType,
+            deviceProperties.deviceName,
             deviceProperties.driverVersion,
-            deviceProperties.deviceName
+            VK_VERSION_MAJOR(deviceProperties.apiVersion),
+            VK_VERSION_MINOR(deviceProperties.apiVersion),
+            VK_VERSION_PATCH(deviceProperties.apiVersion)
         );
 
 
