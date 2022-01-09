@@ -8,6 +8,7 @@ namespace engine {
     glfw_manager::glfw_manager(std::string title, const uint32_t width, const uint32_t height) : _title(title), _width(width), _height(height) {
         if (glfwInit() != GLFW_TRUE)
             throw std::runtime_error("Failed to initialize GLFW!");
+
         // Disable default OpenGL Context creation
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 

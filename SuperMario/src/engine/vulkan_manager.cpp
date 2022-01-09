@@ -251,7 +251,6 @@ namespace engine {
         for (const auto& queueFamily : queueFamilies) {
             if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
                 indices.graphicsFamily = i;
-                break;
             }
 
             // VkBool32 presentSupport = false;
@@ -261,10 +260,9 @@ namespace engine {
             //     indices.presentFamily = i;
             // }
 
-            // ! Needed only when i check surface support
-            // if (indices.isComplete()) {
-            //     break;
-            // }
+            if (indices.isComplete()) {
+                break;
+            }
 
             i++;
         }

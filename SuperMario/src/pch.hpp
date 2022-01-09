@@ -53,9 +53,14 @@
 // #include <system_error>
 
 // === THIRD PARTY ===
+// #define GLAD_VULKAN_IMPLEMENTATION
+#ifdef GLAD_VULKAN_IMPLEMENTATION
+#include <glad/vulkan.h>
+#else
 #include <vulkan/vulkan.h>
-// #include <glad/vulkan.h>
-//#define GLFW_INCLUDE_VULKAN
+#endif
+// #define GLFW_INCLUDE_VULKAN
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE

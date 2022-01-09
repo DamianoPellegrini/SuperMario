@@ -36,7 +36,7 @@ namespace engine {
         auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
         console_sink->set_level(spdlog::level::debug);
 
-        auto file_sink = std::make_shared<spdlog::sinks::daily_file_sink_mt>("logs/%Y-%m-%d.log", 0, 0);
+        auto file_sink = std::make_shared<spdlog::sinks::daily_file_sink_mt>("logs/" + title + ".log", 0, 0);
         file_sink->set_level(spdlog::level::warn);
 
         this->_logger = std::shared_ptr<spdlog::logger>(new spdlog::logger(title, { console_sink, file_sink }));
