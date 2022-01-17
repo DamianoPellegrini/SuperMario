@@ -9,6 +9,7 @@
 
 // === STL Containers ===
 #include <vector>
+#include <map>
 
 // === STL Atomics and threading ===
 #include <atomic>
