@@ -10,6 +10,8 @@
 // === STL Containers ===
 #include <vector>
 #include <map>
+#include <set>
+#include <unordered_set>
 
 // === STL Atomics and threading ===
 #include <atomic>
