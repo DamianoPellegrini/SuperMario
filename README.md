@@ -8,9 +8,7 @@ SuperMario clone written in C++20 using Vulkan.
 
 - premake5
 - VulkanSDK
-- spirv tools
-- xorg (on-linux)
-- MoltenVK (on-macos)
+- xorg (linux-only)
 
 #### *MacOS*
 
@@ -37,11 +35,11 @@ apt install \
 
 ### **Configure & Run**
 
-Run these command to get up and running
+To compile and run the program (run inside the root folder):
 
 ```shell
 premake5 gmake2
 make clean
 make config=release all
-(cd ./run && exec ../bin/Release/SuperMario)
+./scripts/run.sh Release
 ```
