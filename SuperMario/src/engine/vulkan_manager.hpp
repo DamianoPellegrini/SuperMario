@@ -3,11 +3,13 @@
 
 #include "manager.hpp"
 #include "queue_family_indices.hpp"
+#include "glfw_manager.hpp"
 
 namespace engine {
     class vulkan_manager : public manager {
     private:
         std::string _application_name;
+        std::shared_ptr<glfw_manager> _glfw_manager;
 
         vk::Instance _instance;
 
@@ -19,11 +21,14 @@ namespace engine {
 
         vk::DebugUtilsMessengerEXT _debugMessenger;
 
+        vk::SurfaceKHR _surface;
+
         vk::PhysicalDevice _physicalDevice;
 
         vk::Device _device;
 
         vk::Queue _graphicsQueue;
+        vk::Queue _presentQueue;
 
 #ifdef NDEBUG
         const bool _enableDebugMode = false;
@@ -32,7 +37,7 @@ namespace engine {
 #endif
 
     public:
-        vulkan_manager(const std::string& application_name);
+        vulkan_manager(const std::string& application_name, std::shared_ptr<glfw_manager> glfw_manager);
         virtual ~vulkan_manager() override;
         virtual void run() override;
     private:
@@ -42,6 +47,8 @@ namespace engine {
         bool checkExtensionSupport(const std::vector<const char*>& extensions);
 
         void createInstance();
+
+        void createSurface();
 
         void setupDebugCallback();
 
