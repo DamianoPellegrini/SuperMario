@@ -14,7 +14,7 @@ namespace engine {
         bool _running;
 
         std::unique_ptr<vulkan_manager> _vulkan_manager = nullptr;
-        std::unique_ptr<glfw_manager> _glfw_manager = nullptr;
+        std::shared_ptr<glfw_manager> _glfw_manager = nullptr;
     public:
         application(const std::string& title, const uint32_t window_width, const uint32_t window_height);
         ~application();

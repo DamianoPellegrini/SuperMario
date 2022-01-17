@@ -22,8 +22,8 @@ namespace engine {
         // this->_vulkan_manager = vulkanFut.get();
 
         spdlog::warn("Application bootstrapped!");
-        this->_glfw_manager = std::make_unique<glfw_manager>(title, width, height);
-        this->_vulkan_manager = std::make_unique<vulkan_manager>(title);
+        this->_glfw_manager = std::make_shared<glfw_manager>(title, width, height);
+        this->_vulkan_manager = std::make_unique<vulkan_manager>(title, this->_glfw_manager);
     }
 
     application::~application() {}

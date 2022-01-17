@@ -37,20 +37,22 @@ namespace engine {
         );
     }
 
-    vulkan_manager::vulkan_manager(const std::string& application_name)
-        : _application_name(application_name) {
+    vulkan_manager::vulkan_manager(const std::string& application_name, std::shared_ptr<glfw_manager> glfw_manager)
+        : _application_name(application_name), _glfw_manager(glfw_manager) {
         this->createInstance();
         this->setupDebugCallback();
+        this->createSurface();
         this->pickPhysicalDevice();
         this->createLogicalDevice();
     }
 
     vulkan_manager::~vulkan_manager() {
+        this->_device.destroy();
         if (this->_enableDebugMode) {
             this->_instance.destroyDebugUtilsMessengerEXT(this->_debugMessenger, nullptr);
         }
 
-        this->_device.destroy();
+        this->_instance.destroySurfaceKHR(this->_surface, nullptr);
         this->_instance.destroy();
     }
 
@@ -172,6 +174,14 @@ namespace engine {
         return VK_FALSE; // continue propagation
     }
 
+    void vulkan_manager::createSurface() {
+        VkSurfaceKHR surface;
+        if (glfwCreateWindowSurface(this->_instance, this->_glfw_manager->get_window(), nullptr, &surface) != VK_SUCCESS)
+            throw std::runtime_error("failed to create window surface!");
+
+        this->_surface = vk::SurfaceKHR(surface);
+    }
+
     void vulkan_manager::pickPhysicalDevice() {
 
         auto devices = this->_instance.enumeratePhysicalDevices();
@@ -243,12 +253,9 @@ namespace engine {
                 indices.transferFamily = i;
             }
 
-            // vk::Bool32 presentSupport = false;
-            // device.getSurfaceSupportKHR(i, this->_surface, &presentSupport);
-
-            // if (queueFamily.queueCount > 0 && presentSupport) {
-            //     indices.presentFamily = i;
-            // }
+            if (device.getSurfaceSupportKHR(i, this->_surface)) {
+                indices.presentFamily = i;
+            }
 
             if (indices.isComplete()) {
                 break;
@@ -263,14 +270,21 @@ namespace engine {
     void vulkan_manager::createLogicalDevice() {
         QueueFamilyIndices indices = this->findQueueFamilies(this->_physicalDevice);
 
-        vk::DeviceQueueCreateInfo queueCreateInfo{
-            {},
-            indices.graphicsFamily.value(),
-            1
-        };
-
         float queuePriority = 1.0f;
-        queueCreateInfo.pQueuePriorities = &queuePriority;
+        std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos{
+            vk::DeviceQueueCreateInfo{
+                {},
+                indices.graphicsFamily.value(),
+                1,
+                &queuePriority
+        },
+            vk::DeviceQueueCreateInfo{
+                {},
+                indices.presentFamily.value(),
+                1,
+                &queuePriority
+        }
+        };
 
         // Used to specify whihc features are used effectively
         vk::PhysicalDeviceFeatures deviceFeatures{};
@@ -278,7 +292,7 @@ namespace engine {
 
         vk::DeviceCreateInfo deviceInfo{
             {},
-            queueCreateInfo,
+            queueCreateInfos,
             this->_validationLayers,
             extensions,
             &deviceFeatures
@@ -286,6 +300,7 @@ namespace engine {
 
         this->_device = this->_physicalDevice.createDevice(deviceInfo);
         this->_graphicsQueue = this->_device.getQueue(indices.graphicsFamily.value(), 0);
+        this->_presentQueue = this->_device.getQueue(indices.presentFamily.value(), 0);
     }
 
     void vulkan_manager::run() {}
