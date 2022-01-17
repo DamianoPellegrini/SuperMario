@@ -288,8 +288,8 @@ namespace engine {
 
         // Used to specify whihc features are used effectively
         vk::PhysicalDeviceFeatures deviceFeatures{};
-        std::vector<const char*> deviceExtensions{ "VK_KHR_portability_subset" };
-
+        std::vector<const char*> deviceExtensions{ VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME };
+        
         vk::DeviceCreateInfo deviceInfo{
             {},
             queueCreateInfos,

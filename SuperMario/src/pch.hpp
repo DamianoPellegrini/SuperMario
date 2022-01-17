@@ -34,6 +34,7 @@
 #include <system_error>
 
 // === THIRD PARTY ===
+#define VK_ENABLE_BETA_EXTENSIONS
 #include <vulkan/vulkan.hpp>
 #include "vulkan_extensions.hpp"
 #define GLFW_INCLUDE_NONE
