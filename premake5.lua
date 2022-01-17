@@ -15,15 +15,18 @@ workspace "SuperMario"
 
     filter "system:windows"
         system "windows"
+        defines{"WINDOWS"}
         vectorextensions "SSE2"
 
     filter "system:linux"
         system "linux"
+        defines {"LINUX"}
         vectorextensions "SSE2"
         flags {"LinkTimeOptimization"}
 
     filter "system:macosx"
         system "macosx"
+        defines "MACOS"
 
     -- Deactivate filtering
     filter {}
