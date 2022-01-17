@@ -296,7 +296,7 @@ namespace engine {
             {},
             queueCreateInfos,
             this->_validationLayers,
-            extensions,
+            {},
             &deviceFeatures
         };
 
