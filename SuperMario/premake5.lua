@@ -21,7 +21,7 @@ project "SuperMario"
         "%{wks.location}/dependencies/glm"
     }
 
-    links {"glfw", "glad"}
+    links {"glfw"}
 
     filter "system:windows"
         targetname "%{prj.name}.exe"
