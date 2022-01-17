@@ -271,32 +271,30 @@ namespace engine {
 
     void vulkan_manager::createLogicalDevice() {
         QueueFamilyIndices indices = this->findQueueFamilies(this->_physicalDevice);
-
-        float queuePriority = 1.0f;
-        std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos{
-            vk::DeviceQueueCreateInfo{
-                {},
-                indices.graphicsFamily.value(),
-                1,
-                &queuePriority
-        },
-            vk::DeviceQueueCreateInfo{
-                {},
-                indices.presentFamily.value(),
-                1,
-                &queuePriority
-        }
+        std::unordered_set<std::uint32_t> uniqueIndices{
+            indices.graphicsFamily.value(),
+            indices.presentFamily.value()
         };
+        float queuePriority = 1.0f;
+        std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
+
+        for (const auto& uniqueIndex : uniqueIndices) {
+            vk::DeviceQueueCreateInfo queueCreateInfo{};
+            queueCreateInfo.queueFamilyIndex = uniqueIndex;
+            queueCreateInfo.queueCount = 1;
+            queueCreateInfo.pQueuePriorities = &queuePriority;
+            queueCreateInfos.push_back(queueCreateInfo);
+        }
 
         // Used to specify whihc features are used effectively
         vk::PhysicalDeviceFeatures deviceFeatures{};
-        auto extensions = this->getRequiredExtensions();
+        std::vector<const char*> deviceExtensions{ "VK_KHR_portability_subset" };
 
         vk::DeviceCreateInfo deviceInfo{
             {},
             queueCreateInfos,
             this->_validationLayers,
-            {},
+            deviceExtensions,
             &deviceFeatures
         };
 
