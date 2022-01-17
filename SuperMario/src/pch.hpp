@@ -8,58 +8,31 @@
 #include <filesystem>
 
 // === STL Containers ===
-// #include <array>
-#include <bitset>
-// #include <deque>
-// #include <forward_list>
-// #include <list>
-// #include <map>
-// #include <queue>
-// #include <set>
-// #include <stack>
-// #include <unordered_map>
-// #include <unordered_set>
 #include <vector>
-#include <iterator>
-#include <initializer_list>
-// #include <tuple>
 
 // === STL Atomics and threading ===
-// #include <atomic>
-// #include <condition_variable>
+#include <atomic>
 #include <future>
-// #include <mutex>
-// #include <thread>
+#include <mutex>
+#include <thread>
 
 // === STL Memory ===
-#include <new>
 #include <memory>
-#include <span>
 
 #include <string>
 #include <string_view>
 #include <algorithm>
 // #include <any>
 #include <chrono>
-#include <functional>
 #include <optional>
-// #include <locale>
+#include <locale>
 #include <limits>
 #include <random>
-// #include <ratio>
-// #include <complex>
-// #include <regex>
-// #include <stdexcept>
-// #include <system_error>
+#include <system_error>
 
 // === THIRD PARTY ===
-// #define GLAD_VULKAN_IMPLEMENTATION
-#ifdef GLAD_VULKAN_IMPLEMENTATION
-#include <glad/vulkan.h>
-#else
-#include <vulkan/vulkan.h>
-#endif
-// #define GLFW_INCLUDE_VULKAN
+#include <vulkan/vulkan.hpp>
+#include "vulkan_extensions.hpp"
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #define GLM_FORCE_RADIANS

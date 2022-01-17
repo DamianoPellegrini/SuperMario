@@ -1,23 +1,6 @@
 #include "pch.hpp"
 #include "vulkan_manager.hpp"
 
-VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {
-    auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
-    if (func != nullptr) {
-        return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
-    }
-    else {
-        return VK_ERROR_EXTENSION_NOT_PRESENT;
-    }
-}
-
-void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator) {
-    auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
-    if (func != nullptr) {
-        func(instance, debugMessenger, pAllocator);
-    }
-}
-
 namespace engine {
     vulkan_manager::vulkan_manager(const std::string& application_name)
         : _application_name(application_name) {
@@ -28,10 +11,10 @@ namespace engine {
 
     vulkan_manager::~vulkan_manager() {
         if (this->_enableDebugMode) {
-            DestroyDebugUtilsMessengerEXT(this->_instance, this->_debugMessenger, nullptr);
+            this->_instance.destroyDebugUtilsMessengerEXT(this->_debugMessenger, nullptr);
         }
 
-        vkDestroyInstance(this->_instance, nullptr);
+        this->_instance.destroy();
     }
 
     void vulkan_manager::createInstance() {
@@ -39,47 +22,28 @@ namespace engine {
             throw std::runtime_error("validation layers requested, but not available!");
         }
 
-        VkApplicationInfo appInfo{
-            .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
-            .pApplicationName = this->_application_name.c_str(),
-            .applicationVersion = VK_MAKE_VERSION(1, 0, 0),
-            .pEngineName = "No Engine",
-            .engineVersion = VK_MAKE_VERSION(1, 0, 0),
-            .apiVersion = VK_API_VERSION_1_2
-        };
+        vk::ApplicationInfo appInfo(
+            this->_application_name.c_str(),
+            VK_MAKE_VERSION(1, 0, 0),
+            "No Engine",
+            VK_MAKE_VERSION(1, 0, 0),
+            VK_API_VERSION_1_2);
 
         const auto& extensions = this->getRequiredExtensions();
 
-        VkInstanceCreateInfo createInfo{
-            .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-            .pApplicationInfo = &appInfo,
-            .enabledLayerCount = this->_enableDebugMode ? (uint32_t)this->_validationLayers.size() : 0,
-            .ppEnabledLayerNames = this->_enableDebugMode ? this->_validationLayers.data() : nullptr,
-            .enabledExtensionCount = (uint32_t)extensions.size(),
-            .ppEnabledExtensionNames = extensions.data(),
-        };
+        vk::InstanceCreateInfo instInfo(
+            {},
+            &appInfo,
+            this->_validationLayers,
+            extensions
+        );
 
-        if (vkCreateInstance(&createInfo, nullptr, &this->_instance) != VkResult::VK_SUCCESS)
-            throw std::runtime_error("Failed to create Vulkan instance!");
-
-        uint32_t extensionCount;
-
-        // Get extension count
-        vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
-
-        this->_extensions = std::vector<VkExtensionProperties>{ extensionCount };
-
-        // Get extension information
-        if (vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, this->_extensions.data()) != VkResult::VK_SUCCESS)
-            throw std::runtime_error("Failed to enumerate Vulkan instance extensions!");
+        this->_instance = vk::createInstance(instInfo);
+        this->_extensions = vk::enumerateInstanceExtensionProperties();
     }
 
     bool vulkan_manager::checkValidationLayerSupport() {
-        uint32_t layerCount;
-        vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
-
-        std::vector<VkLayerProperties> availableLayers(layerCount);
-        vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+        std::vector<vk::LayerProperties> availableLayers = vk::enumerateInstanceLayerProperties();
 
         for (const auto& layerName : this->_validationLayers) {
             bool layerFound = false;
@@ -116,69 +80,64 @@ namespace engine {
     void vulkan_manager::setupDebugCallback() {
         if (!this->_enableDebugMode) return;
 
-        VkDebugUtilsMessengerCreateInfoEXT createInfo{
-            .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
-            .messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
-            .messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
-            .pfnUserCallback = vulkan_manager::debugCallback,
-            .pUserData = nullptr,
+        vk::DebugUtilsMessengerCreateInfoEXT messInfo{
+            {},
+            vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose |
+            vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
+            vk::DebugUtilsMessageSeverityFlagBitsEXT::eError |
+            vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo,
+            vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
+            vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
+            vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance,
+            (PFN_vkDebugUtilsMessengerCallbackEXT)&vulkan_manager::debugCallback,
+            nullptr
         };
 
-        if (CreateDebugUtilsMessengerEXT(this->_instance, &createInfo, nullptr, &this->_debugMessenger) != VkResult::VK_SUCCESS) {
-            throw std::runtime_error("failed to set up debug callback!");
-        }
+        this->_debugMessenger = this->_instance.createDebugUtilsMessengerEXT(messInfo);
     }
 
-    VkBool32 VKAPI_CALL vulkan_manager::debugCallback(
-        VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-        VkDebugUtilsMessageTypeFlagsEXT messageType,
-        const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+    vk::Bool32 VKAPI_CALL vulkan_manager::debugCallback(
+        vk::DebugUtilsMessageSeverityFlagsEXT messageSeverity,
+        vk::DebugUtilsMessageTypeFlagsEXT messageType,
+        const vk::DebugUtilsMessengerCallbackDataEXT* pCallbackData,
         void* pUserData) {
         const char* type = nullptr;
 
-        switch (messageType) {
-        case VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT:
+        if (messageType & vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral) {
             type = "GENERAL";
-            break;
-        case VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT:
+        }
+        else if (messageType & vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation) {
             type = "VALIDATION";
-            break;
-        case VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT:
+        }
+        else if (messageType & vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance) {
             type = "PERFORMANCE";
-            break;
-        default:
+        }
+        else {
             type = "UNKNOWN";
-            break;
         }
 
-        switch (messageSeverity) {
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
+        if (messageSeverity & vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose) {
             spdlog::trace("[VK_DEBUG] [{}] {}", type, pCallbackData->pMessage);
-            break;
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
+        }
+        else if (messageSeverity & vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo) {
             spdlog::info("[VK_DEBUG] [{}] {}", type, pCallbackData->pMessage);
-            break;
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
+        }
+        else if (messageSeverity & vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning) {
             spdlog::warn("[VK_DEBUG] [{}] {}", type, pCallbackData->pMessage);
-            break;
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
+        }
+        else if (messageSeverity & vk::DebugUtilsMessageSeverityFlagBitsEXT::eError) {
             spdlog::error("[VK_DEBUG] [{}] {}", type, pCallbackData->pMessage);
-            break;
-        default:
+        }
+        else {
             spdlog::critical("[VK_DEBUG] [{}] {}", type, pCallbackData->pMessage);
         }
 
-        return VK_FALSE; // continue propagating
+        return VK_FALSE; // continue propagation
     }
 
     void vulkan_manager::pickPhysicalDevice() {
-        uint32_t deviceCount = 0;
-        vkEnumeratePhysicalDevices(this->_instance, &deviceCount, nullptr);
-        if (deviceCount == 0)
-            throw std::runtime_error("Failed to find GPUs with Vulkan support!");
 
-        std::vector<VkPhysicalDevice> devices(deviceCount);
-        vkEnumeratePhysicalDevices(this->_instance, &deviceCount, devices.data());
+        auto devices = this->_instance.enumeratePhysicalDevices();
 
         for (const auto& device : devices) {
             if (this->isDeviceSuitable(device)) {
@@ -187,31 +146,28 @@ namespace engine {
             }
         }
 
-        if (this->_physicalDevice == VK_NULL_HANDLE)
+        if (!this->_physicalDevice)
             throw std::runtime_error("Failed to find a suitable GPU!");
 
 
     }
 
-    bool vulkan_manager::isDeviceSuitable(VkPhysicalDevice device) {
-        VkPhysicalDeviceProperties deviceProperties;
-        vkGetPhysicalDeviceProperties(device, &deviceProperties);
-
-        VkPhysicalDeviceFeatures deviceFeatures;
-        vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+    bool vulkan_manager::isDeviceSuitable(vk::PhysicalDevice device) {
+        auto deviceProperties = device.getProperties();
+        auto deviceFeatures = device.getFeatures();
 
         const char* deviceType = nullptr;
         switch (deviceProperties.deviceType) {
-        case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
+        case vk::PhysicalDeviceType::eIntegratedGpu:
             deviceType = "Integrated GPU";
             break;
-        case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
+        case vk::PhysicalDeviceType::eDiscreteGpu:
             deviceType = "Discrete GPU";
             break;
-        case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:
+        case vk::PhysicalDeviceType::eVirtualGpu:
             deviceType = "Virtual GPU";
             break;
-        case VK_PHYSICAL_DEVICE_TYPE_CPU:
+        case vk::PhysicalDeviceType::eCpu:
             deviceType = "CPU";
             break;
         default:
@@ -233,23 +189,18 @@ namespace engine {
 
         return indices.isComplete();
 
-        // Implement GPU scoring
-        return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU
+        // TODO: Implement GPU scoring
+        return deviceProperties.deviceType == vk::PhysicalDeviceType::eDiscreteGpu
             && deviceFeatures.geometryShader;
     }
 
-    QueueFamilyIndices vulkan_manager::findQueueFamilies(VkPhysicalDevice device) {
+    QueueFamilyIndices vulkan_manager::findQueueFamilies(vk::PhysicalDevice device) {
         QueueFamilyIndices indices;
-
-        uint32_t queueFamilyCount = 0;
-        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
-
-        std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
-        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+        auto queueFamilies = device.getQueueFamilyProperties();
 
         uint32_t i = 0;
         for (const auto& queueFamily : queueFamilies) {
-            if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+            if (queueFamily.queueCount > 0 && queueFamily.queueFlags & vk::QueueFlagBits::eGraphics) {
                 indices.graphicsFamily = i;
             }
 

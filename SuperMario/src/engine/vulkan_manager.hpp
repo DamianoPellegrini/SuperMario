@@ -9,17 +9,17 @@ namespace engine {
     private:
         std::string _application_name;
 
-        VkInstance _instance;
+        vk::Instance _instance;
 
-        std::vector<VkExtensionProperties> _extensions;
+        std::vector<vk::ExtensionProperties> _extensions;
 
         const std::vector<const char*> _validationLayers = {
             "VK_LAYER_KHRONOS_validation"
         };
 
-        VkDebugUtilsMessengerEXT _debugMessenger;
+        vk::DebugUtilsMessengerEXT _debugMessenger;
 
-        VkPhysicalDevice _physicalDevice;
+        vk::PhysicalDevice _physicalDevice;
 
 #ifdef NDEBUG
         const bool _enableDebugMode = false;
@@ -38,13 +38,13 @@ namespace engine {
         void createInstance();
         void setupDebugCallback();
         void pickPhysicalDevice();
-        bool isDeviceSuitable(VkPhysicalDevice device);
-        QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
+        bool isDeviceSuitable(vk::PhysicalDevice device);
+        QueueFamilyIndices findQueueFamilies(vk::PhysicalDevice device);
 
-        static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
-            VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-            VkDebugUtilsMessageTypeFlagsEXT messageType,
-            const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+        static VKAPI_ATTR vk::Bool32 VKAPI_CALL debugCallback(
+            vk::DebugUtilsMessageSeverityFlagsEXT messageSeverity,
+            vk::DebugUtilsMessageTypeFlagsEXT messageType,
+            const vk::DebugUtilsMessengerCallbackDataEXT* pCallbackData,
             void* pUserData
         );
     };
