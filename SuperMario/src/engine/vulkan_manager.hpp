@@ -17,6 +17,13 @@ namespace engine {
             "VK_LAYER_KHRONOS_validation"
         };
 
+        const std::vector<const char*> _deviceExtensions = {
+            #ifdef MACOS
+            VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME,
+            #endif
+            VK_KHR_SWAPCHAIN_EXTENSION_NAME
+        };
+
         std::vector<vk::ExtensionProperties> _extensions;
 
         vk::DebugUtilsMessengerEXT _debugMessenger;
@@ -55,6 +62,7 @@ namespace engine {
         void pickPhysicalDevice();
         int32_t rateDeviceSuitability(vk::PhysicalDevice device);
         bool isDeviceSuitable(vk::PhysicalDevice device, const vk::PhysicalDeviceProperties* deviceProperties, const vk::PhysicalDeviceFeatures* deviceFeatures);
+        bool checkDeviceExtensionSupport(vk::PhysicalDevice device);
         QueueFamilyIndices findQueueFamilies(vk::PhysicalDevice device);
 
         void createLogicalDevice();

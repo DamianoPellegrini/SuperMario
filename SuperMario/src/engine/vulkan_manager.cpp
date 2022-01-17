@@ -231,7 +231,7 @@ namespace engine {
 
         QueueFamilyIndices indices = this->findQueueFamilies(device);
 
-        return indices.isComplete(); // && deviceFeatures.geometryShader;
+        return indices.isComplete() && this->checkDeviceExtensionSupport(device); // && deviceFeatures.geometryShader;
     }
 
     QueueFamilyIndices vulkan_manager::findQueueFamilies(vk::PhysicalDevice device) {
@@ -269,6 +269,18 @@ namespace engine {
         return indices;
     }
 
+    bool vulkan_manager::checkDeviceExtensionSupport(vk::PhysicalDevice device) {
+        std::vector<vk::ExtensionProperties> availableExtensions = device.enumerateDeviceExtensionProperties();
+
+        std::set<std::string> requiredExtensions(this->_deviceExtensions.begin(), this->_deviceExtensions.end());
+
+        for (const auto& extension : availableExtensions) {
+            requiredExtensions.erase(extension.extensionName);
+        }
+
+        return requiredExtensions.empty();
+    }
+
     void vulkan_manager::createLogicalDevice() {
         QueueFamilyIndices indices = this->findQueueFamilies(this->_physicalDevice);
         std::unordered_set<std::uint32_t> uniqueIndices{
@@ -286,15 +298,14 @@ namespace engine {
             queueCreateInfos.push_back(queueCreateInfo);
         }
 
-        // Used to specify whihc features are used effectively
+        // Used to specify which features are used effectively
         vk::PhysicalDeviceFeatures deviceFeatures{};
-        std::vector<const char*> deviceExtensions{ VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME };
         
         vk::DeviceCreateInfo deviceInfo{
             {},
             queueCreateInfos,
             this->_validationLayers,
-            deviceExtensions,
+            this->_deviceExtensions,
             &deviceFeatures
         };
 
