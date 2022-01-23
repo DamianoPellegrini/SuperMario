@@ -1,8 +1,12 @@
 #include "pch.hpp"
 #include "engine/application.hpp"
+#include "engine/modules/config_loader.hpp"
+#include "config.hpp"
 
 int32_t main(int32_t argc, const char* argv[]) {
     int32_t exitCondition = EXIT_SUCCESS;
+
+    auto cfg = engine::config_loader<super_mario::config>::load_config("/Users/damiano/config.json");
 
     // TODO: Detach logger initialization from application so
     // that it can flush the log if the application crash and
@@ -12,8 +16,8 @@ int32_t main(int32_t argc, const char* argv[]) {
     try {
         app = new engine::application{
             "Super Mario",
-            1280,
-            720
+            cfg.width,
+            cfg.height
         };
         app->run();
     }
