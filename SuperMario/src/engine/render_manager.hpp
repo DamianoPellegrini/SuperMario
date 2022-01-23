@@ -1,15 +1,23 @@
-#ifndef _VULKAN_MANAGER_HPP_
-#define _VULKAN_MANAGER_HPP_
+#ifndef _RENDER_MANAGER_HPP_
+#define _RENDER_MANAGER_HPP_
 
-#include "old_manager.hpp"
-#include "queue_family_indices.hpp"
-#include "swap_chain_support_details.hpp"
+#include "manager.hpp"
+#include "singleton.hpp"
+#include "engine/renderer/queue_family_indices.hpp"
+#include "engine/renderer/swap_chain_support_details.hpp"
 
 namespace engine {
-    class vulkan_manager : public old_manager {
+
+    struct render_manager_config {
+        std::string title;
+        GLFWwindow* window;
+    };
+
+    class render_manager
+        : public manager<render_manager_config>,
+        public singleton<render_manager> {
     private:
-        std::string _application_name;
-        GLFWwindow* _window;
+        render_manager_config _config;
 
         vk::Instance _instance;
 
@@ -50,9 +58,8 @@ namespace engine {
 #endif
 
     public:
-        vulkan_manager(const std::string& application_name, GLFWwindow* window);
-        virtual ~vulkan_manager() override;
-        virtual void run() override;
+        virtual void init(render_manager_config config) final override;
+        virtual void shutdown() final override;
     private:
         // Debugging and validation
         bool checkValidationLayerSupport();
@@ -71,13 +78,13 @@ namespace engine {
         int32_t rateDeviceSuitability(vk::PhysicalDevice device);
         bool isDeviceSuitable(vk::PhysicalDevice device, const vk::PhysicalDeviceProperties* deviceProperties, const vk::PhysicalDeviceFeatures* deviceFeatures);
         bool checkDeviceExtensionSupport(vk::PhysicalDevice device);
-        QueueFamilyIndices findQueueFamilies(vk::PhysicalDevice device);
+        renderer::QueueFamilyIndices findQueueFamilies(vk::PhysicalDevice device);
 
         // Logical device
         void createLogicalDevice();
 
         // Swap chain
-        SwapChainSupportDetails querySwapChainSupport(vk::PhysicalDevice device);
+        renderer::SwapChainSupportDetails querySwapChainSupport(vk::PhysicalDevice device);
         vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats);
         vk::PresentModeKHR chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& availablePresentModes);
         vk::Extent2D chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities);
@@ -95,5 +102,4 @@ namespace engine {
     };
 } // namespace engine
 
-
-#endif // _VULKAN_MANAGER_HPP_
+#endif // _RENDER_MANAGER_HPP_

@@ -26,6 +26,7 @@
 #include <string_view>
 #include <algorithm>
 // #include <any>
+#include <functional>
 #include <optional>
 #include <limits>
 #include <random>

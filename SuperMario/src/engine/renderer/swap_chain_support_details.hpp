@@ -3,7 +3,7 @@
 
 #include "pch.hpp"
 
-namespace engine {
+namespace engine::renderer {
 
     struct SwapChainSupportDetails {
         vk::SurfaceCapabilitiesKHR capabilities;
@@ -11,6 +11,6 @@ namespace engine {
         std::vector<vk::PresentModeKHR> presentModes;
     };
 
-} // namespace engine
+} // namespace engine::renderer
 
 #endif // _SWAP_CHAIN_SUPPORT_DETAILS_HPP

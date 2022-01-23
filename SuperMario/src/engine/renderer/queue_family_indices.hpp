@@ -3,7 +3,7 @@
 
 #include "pch.hpp"
 
-namespace engine {
+namespace engine::renderer {
     struct QueueFamilyIndices {
         std::optional<uint32_t> graphicsFamily;
         std::optional<uint32_t> presentFamily;
@@ -19,6 +19,6 @@ namespace engine {
         }
     };
 
-} // namespace engine
+} // namespace engine::renderer
 
 #endif // _QUEUE_FAMILY_INDICES_HPP
