@@ -4,13 +4,12 @@
 #include "old_manager.hpp"
 #include "queue_family_indices.hpp"
 #include "swap_chain_support_details.hpp"
-#include "glfw_manager.hpp"
 
 namespace engine {
     class vulkan_manager : public old_manager {
     private:
         std::string _application_name;
-        std::shared_ptr<glfw_manager> _glfw_manager;
+        GLFWwindow* _window;
 
         vk::Instance _instance;
 
@@ -51,7 +50,7 @@ namespace engine {
 #endif
 
     public:
-        vulkan_manager(const std::string& application_name, std::shared_ptr<glfw_manager> glfw_manager);
+        vulkan_manager(const std::string& application_name, GLFWwindow* window);
         virtual ~vulkan_manager() override;
         virtual void run() override;
     private:

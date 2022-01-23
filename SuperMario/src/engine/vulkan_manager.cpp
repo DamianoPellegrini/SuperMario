@@ -39,8 +39,8 @@ namespace engine {
         );
     }
 
-    vulkan_manager::vulkan_manager(const std::string& application_name, std::shared_ptr<glfw_manager> glfw_manager)
-        : _application_name(application_name), _glfw_manager(glfw_manager) {
+    vulkan_manager::vulkan_manager(const std::string& application_name, GLFWwindow* window)
+        : _application_name(application_name), _window(window) {
         this->createInstance();
         this->setupDebugCallback();
         this->createSurface();
@@ -188,7 +188,7 @@ namespace engine {
 
     void vulkan_manager::createSurface() {
         VkSurfaceKHR surface;
-        if (glfwCreateWindowSurface(this->_instance, this->_glfw_manager->get_window(), nullptr, &surface) != VK_SUCCESS)
+        if (glfwCreateWindowSurface(this->_instance, this->_window, nullptr, &surface) != VK_SUCCESS)
             throw std::runtime_error("failed to create window surface!");
 
         this->_surface = vk::SurfaceKHR(surface);
@@ -371,7 +371,7 @@ namespace engine {
             return capabilities.currentExtent;
 
         int width, height;
-        glfwGetFramebufferSize(this->_glfw_manager->get_window(), &width, &height);
+        glfwGetFramebufferSize(this->_window, &width, &height);
 
         vk::Extent2D actualExtent = {
             static_cast<uint32_t>(width),

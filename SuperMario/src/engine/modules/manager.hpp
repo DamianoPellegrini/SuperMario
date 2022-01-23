@@ -2,6 +2,7 @@
 #define _MANAGER_HPP_
 
 namespace engine {
+    
     template<class ... InitParams>
     class manager {
     protected:

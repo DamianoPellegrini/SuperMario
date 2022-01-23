@@ -2,12 +2,10 @@
 #include "window_manager.hpp"
 
 namespace engine {
-    void window_manager::init(std::string title, uint32_t width, uint32_t height) {
+    void window_manager::init(window_manager_config config) {
         spdlog::info("Initializing window manager...");
 
-        this->_title = title;
-        this->_width = width;
-        this->_height = height;
+        this->_config = config;
 
         if (glfwInit() != GLFW_TRUE)
             throw std::runtime_error("Failed to initialize GLFW!");
@@ -22,7 +20,7 @@ namespace engine {
 #endif
 
         this->_initialized = true;
-        this->_window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
+        this->_window = glfwCreateWindow(config.width, config.height, config.title.c_str(), nullptr, nullptr);
     }
 
     void window_manager::shutdown() {
