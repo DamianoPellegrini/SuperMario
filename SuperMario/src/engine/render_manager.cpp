@@ -1,7 +1,37 @@
 #include "pch.hpp"
-#include "vulkan_manager.hpp"
+#include "render_manager.hpp"
 
 namespace engine {
+    void render_manager::init(render_manager_config config) {
+        spdlog::info("Initializing render manager...");
+        this->_config = config;
+
+        this->createInstance();
+        this->setupDebugCallback();
+        this->createSurface();
+        this->pickPhysicalDevice();
+        this->createLogicalDevice();
+        this->createSwapChain();
+        this->createImageViews();
+        this->createGraphicsPipeline();
+    }
+
+    void render_manager::shutdown() {
+        spdlog::info("Shutting down render manager...");
+
+        for (auto&& imageView : this->_swapChainImageViews) {
+            this->_device.destroyImageView(imageView);
+        }
+
+        this->_device.destroySwapchainKHR(this->_swapChain);
+        this->_device.destroy();
+        if (this->_enableDebugMode) {
+            this->_instance.destroyDebugUtilsMessengerEXT(this->_debugMessenger, nullptr);
+        }
+
+        this->_instance.destroySurfaceKHR(this->_surface, nullptr);
+        this->_instance.destroy();
+    }
 
     void printPhysicalDeviceInfo(vk::PhysicalDevice device) {
         auto deviceProperties = device.getProperties();
@@ -39,35 +69,7 @@ namespace engine {
         );
     }
 
-    vulkan_manager::vulkan_manager(const std::string& application_name, GLFWwindow* window)
-        : _application_name(application_name), _window(window) {
-        this->createInstance();
-        this->setupDebugCallback();
-        this->createSurface();
-        this->pickPhysicalDevice();
-        this->createLogicalDevice();
-        this->createSwapChain();
-        this->createImageViews();
-        this->createGraphicsPipeline();
-    }
-
-    vulkan_manager::~vulkan_manager() {
-
-        for (auto&& imageView : this->_swapChainImageViews) {
-            this->_device.destroyImageView(imageView);
-        }
-
-        this->_device.destroySwapchainKHR(this->_swapChain);
-        this->_device.destroy();
-        if (this->_enableDebugMode) {
-            this->_instance.destroyDebugUtilsMessengerEXT(this->_debugMessenger, nullptr);
-        }
-
-        this->_instance.destroySurfaceKHR(this->_surface, nullptr);
-        this->_instance.destroy();
-    }
-
-    vk::Bool32 VKAPI_CALL vulkan_manager::debugCallback(
+    vk::Bool32 VKAPI_CALL render_manager::debugCallback(
         vk::DebugUtilsMessageSeverityFlagsEXT messageSeverity,
         vk::DebugUtilsMessageTypeFlagsEXT messageType,
         const vk::DebugUtilsMessengerCallbackDataEXT* pCallbackData,
@@ -106,7 +108,7 @@ namespace engine {
         return VK_FALSE; // continue propagation
     }
 
-    bool vulkan_manager::checkValidationLayerSupport() {
+    bool render_manager::checkValidationLayerSupport() {
         std::vector<vk::LayerProperties> availableLayers = vk::enumerateInstanceLayerProperties();
 
         for (const auto& layerName : this->_validationLayers) {
@@ -127,7 +129,7 @@ namespace engine {
         return true;
     }
 
-    void vulkan_manager::setupDebugCallback() {
+    void render_manager::setupDebugCallback() {
         if (!this->_enableDebugMode) return;
 
         vk::DebugUtilsMessengerCreateInfoEXT messInfo{
@@ -139,20 +141,20 @@ namespace engine {
             vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
             vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
             vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance,
-            (PFN_vkDebugUtilsMessengerCallbackEXT)&vulkan_manager::debugCallback,
+            (PFN_vkDebugUtilsMessengerCallbackEXT)&render_manager::debugCallback,
             nullptr
         };
 
         this->_debugMessenger = this->_instance.createDebugUtilsMessengerEXT(messInfo);
     }
 
-    void vulkan_manager::createInstance() {
+    void render_manager::createInstance() {
         if (this->_enableDebugMode && !checkValidationLayerSupport()) {
             throw std::runtime_error("validation layers requested, but not available!");
         }
 
         vk::ApplicationInfo appInfo(
-            this->_application_name.c_str(),
+            this->_config.title.c_str(),
             VK_MAKE_VERSION(1, 0, 0),
             "No Engine",
             VK_MAKE_VERSION(1, 0, 0),
@@ -172,7 +174,7 @@ namespace engine {
     }
 
     // TODO: can be done with macros like layers and device extensions
-    std::vector<const char*> vulkan_manager::getRequiredExtensions() {
+    std::vector<const char*> render_manager::getRequiredExtensions() {
         uint32_t glfwExtensionCount = 0;
         const char** glfwExtensions;
         glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
@@ -186,15 +188,15 @@ namespace engine {
         return extensions;
     }
 
-    void vulkan_manager::createSurface() {
+    void render_manager::createSurface() {
         VkSurfaceKHR surface;
-        if (glfwCreateWindowSurface(this->_instance, this->_window, nullptr, &surface) != VK_SUCCESS)
+        if (glfwCreateWindowSurface(this->_instance, this->_config.window, nullptr, &surface) != VK_SUCCESS)
             throw std::runtime_error("failed to create window surface!");
 
         this->_surface = vk::SurfaceKHR(surface);
     }
 
-    void vulkan_manager::pickPhysicalDevice() {
+    void render_manager::pickPhysicalDevice() {
 
         auto devices = this->_instance.enumeratePhysicalDevices();
 
@@ -218,7 +220,7 @@ namespace engine {
     /// </summary>
     /// <param name="device">The device to rate.</param>
     /// <returns>A positive score, negative means invalid</returns>
-    int32_t vulkan_manager::rateDeviceSuitability(vk::PhysicalDevice device) {
+    int32_t render_manager::rateDeviceSuitability(vk::PhysicalDevice device) {
         auto deviceProperties = device.getProperties();
         auto deviceFeatures = device.getFeatures();
 
@@ -234,12 +236,12 @@ namespace engine {
         return score;
     }
 
-    bool vulkan_manager::isDeviceSuitable(vk::PhysicalDevice device, const vk::PhysicalDeviceProperties* deviceProperties = nullptr, const vk::PhysicalDeviceFeatures* deviceFeatures = nullptr) {
+    bool render_manager::isDeviceSuitable(vk::PhysicalDevice device, const vk::PhysicalDeviceProperties* deviceProperties = nullptr, const vk::PhysicalDeviceFeatures* deviceFeatures = nullptr) {
         // If device structs are not provided fetch them using the handle
         auto properties = deviceProperties != nullptr ? *deviceProperties : device.getProperties();
         auto features = deviceFeatures != nullptr ? *deviceFeatures : device.getFeatures();
 
-        QueueFamilyIndices indices = this->findQueueFamilies(device);
+        renderer::QueueFamilyIndices indices = this->findQueueFamilies(device);
         bool deviceExtSupported = this->checkDeviceExtensionSupport(device);
 
         // control the swap chain only swap chain extension is supported
@@ -252,8 +254,8 @@ namespace engine {
         return indices.isComplete() && deviceExtSupported && swapChainAdequate; // && deviceFeatures.geometryShader;
     }
 
-    QueueFamilyIndices vulkan_manager::findQueueFamilies(vk::PhysicalDevice device) {
-        QueueFamilyIndices indices;
+    renderer::QueueFamilyIndices render_manager::findQueueFamilies(vk::PhysicalDevice device) {
+        renderer::QueueFamilyIndices indices;
         auto queueFamilies = device.getQueueFamilyProperties();
 
         uint32_t i = 0;
@@ -287,7 +289,7 @@ namespace engine {
         return indices;
     }
 
-    bool vulkan_manager::checkDeviceExtensionSupport(vk::PhysicalDevice device) {
+    bool render_manager::checkDeviceExtensionSupport(vk::PhysicalDevice device) {
         std::vector<vk::ExtensionProperties> availableExtensions = device.enumerateDeviceExtensionProperties();
 
         std::set<std::string> requiredExtensions(this->_deviceExtensions.begin(), this->_deviceExtensions.end());
@@ -299,8 +301,8 @@ namespace engine {
         return requiredExtensions.empty();
     }
 
-    void vulkan_manager::createLogicalDevice() {
-        QueueFamilyIndices indices = this->findQueueFamilies(this->_physicalDevice);
+    void render_manager::createLogicalDevice() {
+        renderer::QueueFamilyIndices indices = this->findQueueFamilies(this->_physicalDevice);
         std::unordered_set<std::uint32_t> uniqueIndices{
             indices.graphicsFamily.value(),
             indices.presentFamily.value()
@@ -332,8 +334,8 @@ namespace engine {
         this->_presentQueue = this->_device.getQueue(indices.presentFamily.value(), 0);
     }
 
-    SwapChainSupportDetails vulkan_manager::querySwapChainSupport(vk::PhysicalDevice device) {
-        SwapChainSupportDetails details;
+    renderer::SwapChainSupportDetails render_manager::querySwapChainSupport(vk::PhysicalDevice device) {
+        renderer::SwapChainSupportDetails details;
 
         details.capabilities = device.getSurfaceCapabilitiesKHR(this->_surface);
         details.formats = device.getSurfaceFormatsKHR(this->_surface);
@@ -342,7 +344,7 @@ namespace engine {
         return details;
     }
 
-    vk::SurfaceFormatKHR vulkan_manager::chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats) {
+    vk::SurfaceFormatKHR render_manager::chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats) {
         if (availableFormats.size() == 1 && availableFormats[0].format == vk::Format::eUndefined) {
             return { vk::Format::eB8G8R8A8Srgb, vk::ColorSpaceKHR::eSrgbNonlinear };
         }
@@ -356,7 +358,7 @@ namespace engine {
         return availableFormats[0];
     }
 
-    vk::PresentModeKHR vulkan_manager::chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& availablePresentModes) {
+    vk::PresentModeKHR render_manager::chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& availablePresentModes) {
         for (const auto& availablePresentMode : availablePresentModes) {
             if (availablePresentMode == vk::PresentModeKHR::eMailbox) {
                 return availablePresentMode;
@@ -366,12 +368,12 @@ namespace engine {
         return vk::PresentModeKHR::eFifo;
     }
 
-    vk::Extent2D vulkan_manager::chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities) {
+    vk::Extent2D render_manager::chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities) {
         if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
             return capabilities.currentExtent;
 
         int width, height;
-        glfwGetFramebufferSize(this->_window, &width, &height);
+        glfwGetFramebufferSize(this->_config.window, &width, &height);
 
         vk::Extent2D actualExtent = {
             static_cast<uint32_t>(width),
@@ -384,7 +386,7 @@ namespace engine {
         return actualExtent;
     }
 
-    void vulkan_manager::createSwapChain() {
+    void render_manager::createSwapChain() {
         auto swapChainSupport = this->querySwapChainSupport(this->_physicalDevice);
 
         auto surfaceFormat = this->chooseSwapSurfaceFormat(swapChainSupport.formats);
@@ -427,7 +429,7 @@ namespace engine {
         this->_swapChainExtent = extent;
     }
 
-    void vulkan_manager::createImageViews() {
+    void render_manager::createImageViews() {
         this->_swapChainImageViews.resize(this->_swapChainImages.size());
 
         for (size_t i = 0; i < this->_swapChainImages.size(); i++) {
@@ -455,10 +457,7 @@ namespace engine {
         }
     }
 
-    void vulkan_manager::createGraphicsPipeline() {
+    void render_manager::createGraphicsPipeline() {
         // TODO: Load Shaders
     }
-
-    void vulkan_manager::run() {}
-
 } // namespace engine

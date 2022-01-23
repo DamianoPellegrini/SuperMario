@@ -1,8 +1,8 @@
 #include "pch.hpp"
 #include "application.hpp"
-#include "engine/modules/logger.hpp"
-#include "engine/modules/config_loader.hpp"
-#include "engine/modules/window_manager.hpp"
+#include "engine/logger.hpp"
+#include "engine/config_loader.hpp"
+#include "engine/window_manager.hpp"
 #include "config.hpp"
 
 int32_t main(int32_t argc, const char* argv[]) {
