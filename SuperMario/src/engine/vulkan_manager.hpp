@@ -3,6 +3,7 @@
 
 #include "manager.hpp"
 #include "queue_family_indices.hpp"
+#include "swap_chain_support_details.hpp"
 #include "glfw_manager.hpp"
 
 namespace engine {
@@ -37,6 +38,12 @@ namespace engine {
         vk::Queue _graphicsQueue;
         vk::Queue _presentQueue;
 
+        vk::SwapchainKHR _swapChain;
+        std::vector<vk::Image> _swapChainImages;
+        vk::Format _swapChainImageFormat;
+        vk::Extent2D _swapChainExtent;
+        std::vector<vk::ImageView> _swapChainImageViews;
+
 #ifdef NDEBUG
         const bool _enableDebugMode = false;
 #else
@@ -48,24 +55,37 @@ namespace engine {
         virtual ~vulkan_manager() override;
         virtual void run() override;
     private:
+        // Debugging and validation
         bool checkValidationLayerSupport();
-
-        std::vector<const char*> getRequiredExtensions();
-        bool checkExtensionSupport(const std::vector<const char*>& extensions);
-
-        void createInstance();
-
-        void createSurface();
-
         void setupDebugCallback();
 
+        std::vector<const char*> getRequiredExtensions();
+
+        // Instance
+        void createInstance();
+
+        // Surface
+        void createSurface();
+
+        // Physical device
         void pickPhysicalDevice();
         int32_t rateDeviceSuitability(vk::PhysicalDevice device);
         bool isDeviceSuitable(vk::PhysicalDevice device, const vk::PhysicalDeviceProperties* deviceProperties, const vk::PhysicalDeviceFeatures* deviceFeatures);
         bool checkDeviceExtensionSupport(vk::PhysicalDevice device);
         QueueFamilyIndices findQueueFamilies(vk::PhysicalDevice device);
 
+        // Logical device
         void createLogicalDevice();
+
+        // Swap chain
+        SwapChainSupportDetails querySwapChainSupport(vk::PhysicalDevice device);
+        vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats);
+        vk::PresentModeKHR chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& availablePresentModes);
+        vk::Extent2D chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities);
+        void createSwapChain();
+        void createImageViews();
+
+        void createGraphicsPipeline();
 
         static VKAPI_ATTR vk::Bool32 VKAPI_CALL debugCallback(
             vk::DebugUtilsMessageSeverityFlagsEXT messageSeverity,
