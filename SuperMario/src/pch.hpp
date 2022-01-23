@@ -40,7 +40,11 @@
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
-#include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
+
+// Logging lib
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/sinks/daily_file_sink.h>
 
 #endif // _PCH_HPP_

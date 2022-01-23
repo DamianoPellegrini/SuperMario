@@ -1,10 +1,10 @@
 #ifndef _GLFW_MANAGER_HPP_
 #define _GLFW_MANAGER_HPP_
 
-#include "manager.hpp"
+#include "old_manager.hpp"
 
 namespace engine {
-    class glfw_manager : public manager {
+    class glfw_manager : public old_manager {
     private:
         std::string _title;
         uint32_t _width;

@@ -8,9 +8,6 @@ namespace engine {
 
     class application {
     private:
-
-        std::shared_ptr<spdlog::logger> _logger = nullptr;
-
         bool _running;
 
         std::unique_ptr<vulkan_manager> _vulkan_manager = nullptr;

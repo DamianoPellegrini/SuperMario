@@ -40,7 +40,7 @@ project "SuperMario"
             "Cocoa.framework", "IOKit.framework", "CoreVideo.framework",
             "vulkan"
         }
-        buildoptions {"-Wdeprecated-volatile", "-Wdeprecated-declarations"}
+        buildoptions {"-Wdeprecated-volatile", "-Wno-deprecated-declarations", "-Wno-defaulted-function-deleted"}
 
     -- Cross platform dependencies
     filter {}
