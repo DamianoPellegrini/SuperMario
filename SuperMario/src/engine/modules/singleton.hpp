@@ -5,18 +5,18 @@ namespace engine {
     template<class T>
     class singleton {
     private:
-        static T* _instance;
+        static std::shared_ptr<T> _instance;
     public:
-        static inline T* get() {
+        static inline std::shared_ptr<T> get() {
             if (_instance == nullptr) {
-                _instance = new T();
+                _instance = std::make_shared<T>();
             }
             return _instance;
         };
     };
 
     template<class T>
-    T* singleton<T>::_instance = nullptr;
+    std::shared_ptr<T> singleton<T>::_instance = nullptr;
 } // namespace engine
 
 
