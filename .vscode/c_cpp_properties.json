@@ -87,6 +87,28 @@
             "cppStandard": "c++20",
             "intelliSenseMode": "macos-clang-arm64",
             "configurationProvider": "ms-vscode.makefile-tools"
+        },
+        {
+            "name": "Windows Debug",
+            "includePath": [
+                "${workspaceFolder}/SuperMario/src/**",
+                "${workspaceFolder}/dependencies/glfw/include",
+                "${workspaceFolder}/dependencies/glad/include",
+                "${workspaceFolder}/dependencies/spdlog/include",
+                "${workspaceFolder}/dependencies/glm",
+                "${workspaceFolder}/dependencies/json/include"
+            ],
+            "defines": [
+                "_DEBUG",
+                "DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "windowsSdkVersion": "10.0.19041.0",
+            "compilerPath": "S:\\Programmi\\Microsoft Visual Studio\\2022\\Preview\\VC\\Tools\\MSVC\\14.31.31103\\bin\\Hostx64\\x64\\cl.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++20",
+            "intelliSenseMode": "windows-msvc-x64"
         }
     ],
     "version": 4

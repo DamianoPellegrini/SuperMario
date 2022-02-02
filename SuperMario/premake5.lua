@@ -24,7 +24,7 @@ project "SuperMario"
     links {"glfw", "glad"}
 
     filter "system:windows"
-        targetname "%{prj.name}.exe"
+        targetname "%{prj.name}"
         links {"opengl32"}
 
     filter "system:linux"
