@@ -1,0 +1,65 @@
+{
+    // Usare IntelliSense per informazioni sui possibili attributi.
+    // Al passaggio del mouse vengono visualizzate le descrizioni degli attributi esistenti.
+    // Per altre informazioni, visitare: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Mac Launch",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/${input:configuration}/SuperMario.app",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/bin/${input:configuration}",
+            "environment": [],
+            "externalConsole": false,
+            "preLaunchTask": "${defaultBuildTask}",
+            "MIMode": "lldb"
+        },
+        {
+            "name": "Linux Launch (Dedicated GPU)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/${input:configuration}/SuperMario",
+            "args": [],
+            "cwd": "${workspaceFolder}/bin/${input:configuration}",
+            "environment": [
+                {
+                    "name": "__NV_PRIME_RENDER_OFFLOAD",
+                    "value": "1"
+                },
+                {
+                    "name": "__GLX_VENDOR_LIBRARY_NAME",
+                    "value": "nvidia"
+                },
+                {
+                    "name": "__VK_LAYER_NV_optimus",
+                    "value": "NVIDIA_only"
+                }
+            ],
+            "externalConsole": false,
+            "preLaunchTask": "${defaultBuildTask}",
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Abilita la riformattazione per gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        }
+    ],
+    "inputs": [
+        {
+            "description": "Build configuration",
+            "id": "configuration",
+            "type": "pickString",
+            "default": "Debug",
+            "options": [
+                "Debug",
+                "Release"
+            ]
+        }
+    ]
+}

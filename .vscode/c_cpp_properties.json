@@ -1,0 +1,93 @@
+{
+    "configurations": [
+        {
+            "name": "Linux Debug",
+            "includePath": [
+                "${workspaceFolder}/SuperMario/src/**",
+                "${workspaceFolder}/dependencies/glfw/include",
+                "${workspaceFolder}/dependencies/glad/include",
+                "${workspaceFolder}/dependencies/spdlog/include",
+                "${workspaceFolder}/dependencies/glm",
+                "${workspaceFolder}/dependencies/json/include"
+            ],
+            "defines": [
+                "DEBUG",
+                "LINUX"
+            ],
+            "compilerPath": "/usr/bin/clang-12",
+            "cStandard": "c17",
+            "cppStandard": "c++20",
+            "intelliSenseMode": "linux-clang-x64",
+            "configurationProvider": "ms-vscode.makefile-tools"
+        },
+        {
+            "name": "Linux Release",
+            "includePath": [
+                "${workspaceFolder}/SuperMario/src/**",
+                "${workspaceFolder}/dependencies/glfw/include",
+                "${workspaceFolder}/dependencies/glad/include",
+                "${workspaceFolder}/dependencies/spdlog/include",
+                "${workspaceFolder}/dependencies/glm",
+                "${workspaceFolder}/dependencies/json/include"
+            ],
+            "defines": [
+                "NDEBUG",
+                "LINUX"
+            ],
+            "compilerPath": "/usr/bin/clang-12",
+            "cStandard": "c17",
+            "cppStandard": "c++20",
+            "intelliSenseMode": "linux-clang-x64",
+            "configurationProvider": "ms-vscode.makefile-tools"
+        },
+        {
+            "name": "Mac Debug",
+            "includePath": [
+                "${workspaceFolder}/SuperMario/src/**",
+                "${workspaceFolder}/dependencies/glfw/include",
+                "${workspaceFolder}/dependencies/glad/include",
+                "${workspaceFolder}/dependencies/spdlog/include",
+                "${workspaceFolder}/dependencies/glm",
+                "${workspaceFolder}/dependencies/json/include",
+                "/usr/local/include"
+            ],
+            "defines": [
+                "DEBUG",
+                "MACOS"
+            ],
+            "macFrameworkPath": [
+                "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks"
+            ],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c17",
+            "cppStandard": "c++20",
+            "intelliSenseMode": "macos-clang-arm64",
+            "configurationProvider": "ms-vscode.makefile-tools"
+        },
+        {
+            "name": "Mac Release",
+            "includePath": [
+                "${workspaceFolder}/SuperMario/src/**",
+                "${workspaceFolder}/dependencies/glfw/include",
+                "${workspaceFolder}/dependencies/glad/include",
+                "${workspaceFolder}/dependencies/spdlog/include",
+                "${workspaceFolder}/dependencies/glm",
+                "${workspaceFolder}/dependencies/json/include",
+                "/usr/local/include"
+            ],
+            "defines": [
+                "NDEBUG",
+                "MACOS"
+            ],
+            "macFrameworkPath": [
+                "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks"
+            ],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c17",
+            "cppStandard": "c++20",
+            "intelliSenseMode": "macos-clang-arm64",
+            "configurationProvider": "ms-vscode.makefile-tools"
+        }
+    ],
+    "version": 4
+}

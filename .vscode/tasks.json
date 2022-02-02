@@ -1,0 +1,54 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "make config=${input:configuration} all",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "runOptions": {
+                "instanceLimit": 1
+            },
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "clean",
+            "type": "shell",
+            "command": "make config=${input:configuration} clean",
+            "group": "none",
+            "runOptions": {
+                "instanceLimit": 1
+            },
+            "problemMatcher": "$gcc"
+        }
+    ],
+    "inputs": [
+        {
+            "description": "Build configuration",
+            "id": "configuration",
+            "type": "pickString",
+            "default": "debug",
+            "options": [
+                "debug",
+                "release"
+            ]
+        },
+        {
+            "description": "Build target",
+            "id": "target",
+            "type": "pickString",
+            "default": "all",
+            "options": [
+                "all",
+                "clean",
+                "glfw",
+                "SuperMario"
+            ]
+        }
+    ]
+}
