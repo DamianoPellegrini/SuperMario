@@ -19,18 +19,11 @@ struct VertexLayout {
 
 int main(int argc, char** argv, char** envp) {
 
+    const uint32_t WIDTH = 1280;
+    const uint32_t HEIGHT = 720;
+    const bool VSYNC_ENABLE = true;
+
     std::clog << "Starting..." << std::endl;
-
-    simdjson::dom::parser parser;
-    auto config = parser.load("config.json").get_object();
-
-
-    if (auto configError = config.error()) {
-        std::cerr << "Error while loading the configuration: " << configError << std::endl;
-        return EXIT_FAILURE;
-    }
-
-    std::clog << "Configuration loaded successfully" << std::endl;
 
     //* GLFW Initialization
     if (!glfwInit()) {
@@ -43,11 +36,11 @@ int main(int argc, char** argv, char** envp) {
 
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(config["width"].get_uint64(), config["height"].get_uint64(), "SuperMario", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "SuperMario", nullptr, nullptr);
 
     glfwMakeContextCurrent(window);
 
-    if (config["vsync"].get<bool>()) {
+    if (VSYNC_ENABLE) {
         glfwSwapInterval(1);
     }
     else {

@@ -1,4 +1,5 @@
 project "glad"
+    location "glad"
     kind "StaticLib"
     language "C"
 
@@ -7,9 +8,9 @@ project "glad"
 
     files {
         "%{prj.location}/src/**.c",
-        "%{prj.location}/include/**.h"
+        '%{prj.location}/include/**.h',
     }
 
-    includedirs {
-        "%{prj.location}/include"
-    }
+    includedirs {"%{prj.location}/include"}
+
+    filter {}

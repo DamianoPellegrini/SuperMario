@@ -56,7 +56,7 @@
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 // #include <cxxopts.hpp>
-#include <simdjson.h>
+#include <nlohmann/json.hpp>
 #include <glm/glm.hpp>
 
 #endif
