@@ -31,9 +31,20 @@ int main(int argc, char** argv, char** envp) {
         return EXIT_FAILURE;
     }
 
+    glfwSetErrorCallback([](int error_code, const char* description) {
+        std::stringstream ss;
+        ss << "OpenGLError[" << error_code << "]: " << description << std::endl;
+        std::cerr << ss.str();
+        });
+
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#ifdef MACOS
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // MacOS
+#else
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+#endif
 
     GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "SuperMario", nullptr, nullptr);
 
@@ -85,44 +96,46 @@ int main(int argc, char** argv, char** envp) {
         std::cerr << ss.str();
         });
 
-    glEnable(GL_DEBUG_OUTPUT);
-    glDebugMessageCallback([](GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, GLchar const* message, void const* user_param) {
-        auto const src_str = [source]() {
-            switch (source) {
-            case GL_DEBUG_SOURCE_API: return "API";
-            case GL_DEBUG_SOURCE_WINDOW_SYSTEM: return "WINDOW SYSTEM";
-            case GL_DEBUG_SOURCE_SHADER_COMPILER: return "SHADER COMPILER";
-            case GL_DEBUG_SOURCE_THIRD_PARTY: return "THIRD PARTY";
-            case GL_DEBUG_SOURCE_APPLICATION: return "APPLICATION";
-            case GL_DEBUG_SOURCE_OTHER: return "OTHER";
-            default: return "OTHER";
-            }
-        }();
+    if (glfwExtensionSupported("GL_ARB_debug_output")) {
+        glEnable(GL_DEBUG_OUTPUT);
+        glDebugMessageCallback([](GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, GLchar const* message, void const* user_param) {
+            auto const src_str = [source]() {
+                switch (source) {
+                case GL_DEBUG_SOURCE_API: return "API";
+                case GL_DEBUG_SOURCE_WINDOW_SYSTEM: return "WINDOW SYSTEM";
+                case GL_DEBUG_SOURCE_SHADER_COMPILER: return "SHADER COMPILER";
+                case GL_DEBUG_SOURCE_THIRD_PARTY: return "THIRD PARTY";
+                case GL_DEBUG_SOURCE_APPLICATION: return "APPLICATION";
+                case GL_DEBUG_SOURCE_OTHER: return "OTHER";
+                default: return "OTHER";
+                }
+            }();
 
-        auto const type_str = [type]() {
-            switch (type) {
-            case GL_DEBUG_TYPE_ERROR: return "ERROR";
-            case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: return "DEPRECATED_BEHAVIOR";
-            case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR: return "UNDEFINED_BEHAVIOR";
-            case GL_DEBUG_TYPE_PORTABILITY: return "PORTABILITY";
-            case GL_DEBUG_TYPE_PERFORMANCE: return "PERFORMANCE";
-            case GL_DEBUG_TYPE_MARKER: return "MARKER";
-            case GL_DEBUG_TYPE_OTHER: return "OTHER";
-            default: return "OTHER";
-            }
-        }();
+            auto const type_str = [type]() {
+                switch (type) {
+                case GL_DEBUG_TYPE_ERROR: return "ERROR";
+                case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: return "DEPRECATED_BEHAVIOR";
+                case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR: return "UNDEFINED_BEHAVIOR";
+                case GL_DEBUG_TYPE_PORTABILITY: return "PORTABILITY";
+                case GL_DEBUG_TYPE_PERFORMANCE: return "PERFORMANCE";
+                case GL_DEBUG_TYPE_MARKER: return "MARKER";
+                case GL_DEBUG_TYPE_OTHER: return "OTHER";
+                default: return "OTHER";
+                }
+            }();
 
-        auto const severity_str = [severity]() {
-            switch (severity) {
-            case GL_DEBUG_SEVERITY_NOTIFICATION: return "NOTIFICATION";
-            case GL_DEBUG_SEVERITY_LOW: return "LOW";
-            case GL_DEBUG_SEVERITY_MEDIUM: return "MEDIUM";
-            case GL_DEBUG_SEVERITY_HIGH: return "HIGH";
-            default: return "UNSPECIFIED";
-            }
-        }();
-        std::cout << src_str << ", " << type_str << ", " << severity_str << ", " << id << ": " << message << '\n';
-        }, nullptr);
+            auto const severity_str = [severity]() {
+                switch (severity) {
+                case GL_DEBUG_SEVERITY_NOTIFICATION: return "NOTIFICATION";
+                case GL_DEBUG_SEVERITY_LOW: return "LOW";
+                case GL_DEBUG_SEVERITY_MEDIUM: return "MEDIUM";
+                case GL_DEBUG_SEVERITY_HIGH: return "HIGH";
+                default: return "UNSPECIFIED";
+                }
+            }();
+            std::cout << src_str << ", " << type_str << ", " << severity_str << ", " << id << ": " << message << '\n';
+            }, nullptr);
+    }
 
     // Prints driver info
     std::clog << glGetString(GL_VENDOR) << std::endl;
