@@ -33,7 +33,6 @@ int main(int argc, char** argv, char** envp) {
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "SuperMario", nullptr, nullptr);
@@ -47,11 +46,14 @@ int main(int argc, char** argv, char** envp) {
         glfwSwapInterval(0);
     }
 
-
-    if (!gladLoadGL(glfwGetProcAddress)) {
+    int32_t version = gladLoadGL(glfwGetProcAddress);
+    if (version == 0) {
         std::cerr << "Cannot initialize GLAD!" << std::endl;
         return EXIT_FAILURE;
     }
+
+    // Successfully loaded OpenGL
+    printf("Loaded OpenGL %d.%d\n", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
 
     glfwSetWindowSizeCallback(window, [](GLFWwindow* wnds, int width, int height) {
         glViewport(0, 0, width, height);
