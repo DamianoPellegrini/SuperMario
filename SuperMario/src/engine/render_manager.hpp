@@ -51,6 +51,10 @@ namespace engine {
         vk::Extent2D _swapChainExtent;
         std::vector<vk::ImageView> _swapChainImageViews;
 
+        vk::RenderPass _renderPass;
+
+        vk::PipelineLayout _pipelineLayout;
+
 #ifdef NDEBUG
         const bool _enableDebugMode = false;
 #else
@@ -91,7 +95,12 @@ namespace engine {
         void createSwapChain();
         void createImageViews();
 
+        // Render pass
+        void createRenderPass();
+
+        // Graphics pipeline
         void createGraphicsPipeline();
+        vk::ShaderModule createShaderModule(const std::vector<char>& bytecode);
 
         static VKAPI_ATTR vk::Bool32 VKAPI_CALL debugCallback(
             vk::DebugUtilsMessageSeverityFlagsEXT messageSeverity,

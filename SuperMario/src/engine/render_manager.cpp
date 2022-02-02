@@ -2,38 +2,8 @@
 #include "render_manager.hpp"
 
 namespace engine {
-    void render_manager::init(render_manager_config config) {
-        spdlog::info("Initializing render manager...");
-        this->_config = config;
 
-        this->createInstance();
-        this->setupDebugCallback();
-        this->createSurface();
-        this->pickPhysicalDevice();
-        this->createLogicalDevice();
-        this->createSwapChain();
-        this->createImageViews();
-        this->createGraphicsPipeline();
-    }
-
-    void render_manager::shutdown() {
-        spdlog::info("Shutting down render manager...");
-
-        for (auto&& imageView : this->_swapChainImageViews) {
-            this->_device.destroyImageView(imageView);
-        }
-
-        this->_device.destroySwapchainKHR(this->_swapChain);
-        this->_device.destroy();
-        if (this->_enableDebugMode) {
-            this->_instance.destroyDebugUtilsMessengerEXT(this->_debugMessenger, nullptr);
-        }
-
-        this->_instance.destroySurfaceKHR(this->_surface, nullptr);
-        this->_instance.destroy();
-    }
-
-    void printPhysicalDeviceInfo(vk::PhysicalDevice device) {
+    static void printPhysicalDeviceInfo(vk::PhysicalDevice device) {
         auto deviceProperties = device.getProperties();
         auto deviceFeatures = device.getFeatures();
 
@@ -67,6 +37,55 @@ namespace engine {
             VK_VERSION_MINOR(deviceProperties.apiVersion),
             VK_VERSION_PATCH(deviceProperties.apiVersion)
         );
+    }
+
+    static std::vector<char> readFile(const std::string& filename) {
+        std::ifstream file(filename, std::ios::ate | std::ios::binary);
+
+        if (!file.is_open()) {
+            throw std::runtime_error("Failed to open file!");
+        }
+
+        size_t fileSize = (size_t)file.tellg();
+        std::vector<char> buffer(fileSize);
+        file.seekg(0);
+        file.read(buffer.data(), fileSize);
+        file.close();
+
+        return buffer;
+    }
+
+    void render_manager::init(render_manager_config config) {
+        spdlog::info("Initializing render manager...");
+        this->_config = config;
+
+        this->createInstance();
+        this->setupDebugCallback();
+        this->createSurface();
+        this->pickPhysicalDevice();
+        this->createLogicalDevice();
+        this->createSwapChain();
+        this->createImageViews();
+        this->createGraphicsPipeline();
+    }
+
+    void render_manager::shutdown() {
+        spdlog::info("Shutting down render manager...");
+
+        this->_device.destroyPipelineLayout(this->_pipelineLayout);
+
+        for (auto&& imageView : this->_swapChainImageViews) {
+            this->_device.destroyImageView(imageView);
+        }
+
+        this->_device.destroySwapchainKHR(this->_swapChain);
+        this->_device.destroy();
+        if (this->_enableDebugMode) {
+            this->_instance.destroyDebugUtilsMessengerEXT(this->_debugMessenger, nullptr);
+        }
+
+        this->_instance.destroySurfaceKHR(this->_surface, nullptr);
+        this->_instance.destroy();
     }
 
     vk::Bool32 VKAPI_CALL render_manager::debugCallback(
@@ -457,7 +476,146 @@ namespace engine {
         }
     }
 
+    void render_manager::createRenderPass() {
+        vk::AttachmentDescription colorAttachment{
+            {},
+            this->_swapChainImageFormat,
+            vk::SampleCountFlagBits::e1,
+            vk::AttachmentLoadOp::eClear,
+            vk::AttachmentStoreOp::eStore,
+            vk::AttachmentLoadOp::eDontCare,
+            vk::AttachmentStoreOp::eDontCare,
+            vk::ImageLayout::eUndefined,
+            vk::ImageLayout::ePresentSrcKHR
+        };
+
+    }
+
     void render_manager::createGraphicsPipeline() {
-        // TODO: Load Shaders
+        auto vertShaderCode = readFile("assets/shaders/compiled/vert.spv");
+        auto fragShaderCode = readFile("assets/shaders/compiled/frag.spv");
+
+        auto vertShaderModule = this->createShaderModule(vertShaderCode);
+        auto fragShaderModule = this->createShaderModule(fragShaderCode);
+
+        vk::PipelineShaderStageCreateInfo shaderStages[] = {
+            {
+                {},
+                vk::ShaderStageFlagBits::eVertex,
+                vertShaderModule,
+                "main"
+            },
+            {
+                {},
+                vk::ShaderStageFlagBits::eFragment,
+                fragShaderModule,
+                "main"
+            }
+        };
+
+        vk::PipelineVertexInputStateCreateInfo vertexInputStateInfo{
+            {},
+            0, nullptr,
+            0, nullptr
+        };
+
+        vk::PipelineInputAssemblyStateCreateInfo inputAssemblyStateInfo{
+            {},
+            vk::PrimitiveTopology::eTriangleList,
+            false
+        };
+
+        vk::Viewport viewport{
+            0.f, 0.f,
+            static_cast<float>(this->_swapChainExtent.width),
+            static_cast<float>(this->_swapChainExtent.height),
+            viewport.minDepth = 0.0f,
+            viewport.maxDepth = 1.0f
+        };
+
+        vk::Rect2D scissor{
+            {0, 0},
+            this->_swapChainExtent
+        };
+
+        vk::PipelineViewportStateCreateInfo viewportStateInfo{
+            {},
+            1, &viewport,
+            1, &scissor
+        };
+
+        vk::PipelineRasterizationStateCreateInfo rasterizationStateInfo{
+            {},
+            false,
+            false,
+            vk::PolygonMode::eFill,
+            vk::CullModeFlagBits::eBack,
+            vk::FrontFace::eClockwise,
+            false,
+            0.f,
+            0.f,
+            0.f,
+            1.f
+        };
+
+        vk::PipelineMultisampleStateCreateInfo multisampling{
+            {},
+            vk::SampleCountFlagBits::e1,
+            false,
+            1.f,
+            nullptr,
+            false,
+            false
+        };
+
+        vk::PipelineColorBlendAttachmentState colorBlendAttachment{
+            {},
+            vk::BlendFactor::eOne,
+            vk::BlendFactor::eZero,
+            vk::BlendOp::eAdd,
+            vk::BlendFactor::eOne,
+            vk::BlendFactor::eZero,
+            vk::BlendOp::eAdd,
+            vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA
+        };
+
+        vk::PipelineColorBlendStateCreateInfo colorBlendStateInfo{
+            {},
+            false,
+            vk::LogicOp::eCopy,
+            1, &colorBlendAttachment,
+            {0.f, 0.f, 0.f, 0.f}
+        };
+
+        vk::DynamicState dynamicStates[] = {
+            vk::DynamicState::eViewport,
+            vk::DynamicState::eLineWidth
+        };
+
+        vk::PipelineDynamicStateCreateInfo dynamicStateInfo{
+            {},
+            2, dynamicStates
+        };
+
+        vk::PipelineLayoutCreateInfo pipelineLayoutInfo{
+            {},
+            0, nullptr,
+            0, nullptr
+        };
+
+        this->_pipelineLayout = this->_device.createPipelineLayout(pipelineLayoutInfo);
+
+        this->_device.destroyShaderModule(vertShaderModule);
+        this->_device.destroyShaderModule(fragShaderModule);
+    }
+
+    vk::ShaderModule render_manager::createShaderModule(const std::vector<char>& bytecode) {
+        vk::ShaderModuleCreateInfo createInfo{
+            {},
+            bytecode.size(),
+            reinterpret_cast<const uint32_t*>(bytecode.data())
+        };
+
+        return this->_device.createShaderModule(createInfo);
     }
 } // namespace engine
