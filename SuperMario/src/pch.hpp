@@ -33,6 +33,7 @@
 #include <system_error>
 
 // === THIRD PARTY ===
+#define VULKAN_HPP_NO_CONSTRUCTORS
 #define VK_ENABLE_BETA_EXTENSIONS
 #include <vulkan/vulkan.hpp>
 #include "vulkan_extensions.hpp"

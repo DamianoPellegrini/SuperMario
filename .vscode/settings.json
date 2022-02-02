@@ -81,5 +81,8 @@
         "concepts": "cpp",
         "filesystem": "cpp",
         "__functional_03": "cpp"
-    }
+    },
+    "lldb.displayFormat": "auto",
+    "lldb.showDisassembly": "auto",
+    "lldb.dereferencePointers": true
 }

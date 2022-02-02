@@ -1,6 +1,8 @@
 #ifndef _SINGLETON_HPP_
 #define _SINGLETON_HPP_
 
+#include "pch.hpp"
+
 namespace engine {
     template<class T>
     class singleton {

@@ -55,6 +55,8 @@ namespace engine {
 
         vk::PipelineLayout _pipelineLayout;
 
+        vk::Pipeline _graphicsPipeline;
+
 #ifdef NDEBUG
         const bool _enableDebugMode = false;
 #else
